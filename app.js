@@ -48,7 +48,7 @@ engineInit(
         if (keyWasPressed(84))
         {
             //for(let i=30;i--;)
-                new Grenade(mousePosWorld);
+                new Prop(mousePosWorld);
         }
 
         if (keyWasPressed(69))
@@ -190,29 +190,25 @@ engineInit(
     mainContext.textAlign = 'center';
     const p = percent(gameTimer.get(), 8, 10);
 
-    mainContext.font = '1.4in impact';
     //mainContext.globalCompositeOperation = 'difference';
+    mainContext.fillStyle = new Color(0,0,0,p).rgba();
     if (p > 0)
     {
-        mainContext.fillStyle = `hsl(${time*60},80%,50%,${p})`;
-        mainContext.strokeStyle = new Color(0,0,0,p).rgba();
+        //mainContext.fillStyle = (new Color).setHSLA(time/3,1,.5,p).rgba();
+        mainContext.font = 1+Math.sin(time)*.5+'in impact';
         mainContext.fillText('SPACE HUGGERS', mainCanvas.width/2, 140);
-        mainContext.strokeText('SPACE HUGGERS', mainCanvas.width/2, 140);
     }
 
-    mainContext.fillStyle = new Color(0,0,0,p).rgba();
-    mainContext.font = '.6in impact';
+    mainContext.font = '.5in impact';
     p > 0 && mainContext.fillText('A JS13K Game by Frank Force',mainCanvas.width/2, 210);
 
-
-        // check if any enemies left
-        let enemiesCount = 0;
-        for (const o of engineCollideObjects)
-        {
-            if (o.isCharacter && o.team  == team_enemy && !o.isDead())
-                ++enemiesCount;
-        }
-
+    // check if any enemies left
+    let enemiesCount = 0;
+    for (const o of engineCollideObjects)
+    {
+        if (o.isCharacter && o.team  == team_enemy && !o.isDead())
+            ++enemiesCount;
+    }
 
     mainContext.fillStyle = new Color(0,0,0).rgba();
     mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-30);

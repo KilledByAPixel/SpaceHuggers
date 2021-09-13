@@ -445,14 +445,6 @@ function makeTileLayers(level_)
     tileBackgroundLayer.redraw();
 }
 
-function randomizeLevelParams()
-{
-    levelColor = randColor(new Color(.2,.2,.2), new Color(.8,.8,.8));
-    levelSkyColor = randColor(new Color(.5,.5,.5), new Color(.9,.9,.9));
-    levelSkyHorizonColor = levelSkyColor.subtract(new Color(.05,.05,.05)).mutate(.3).clamp();
-    levelGroundColor = levelColor.mutate().add(new Color(.3,.3,.3)).clamp();
-}
-
 function applyArtToLevel()
 {
     makeTileLayers();
@@ -511,8 +503,11 @@ function nextLevel()
     ++level;
     gravity = -.01;
     levelSeed = randSeed = rand(1e9)|0;
-    randomizeLevelParams();
     levelSize = vec2(min(level*99,400),200);
+    levelColor = randColor(new Color(.2,.2,.2), new Color(.8,.8,.8));
+    levelSkyColor = randColor(new Color(.5,.5,.5), new Color(.9,.9,.9));
+    levelSkyHorizonColor = levelSkyColor.subtract(new Color(.05,.05,.05)).mutate(.3).clamp();
+    levelGroundColor = levelColor.mutate().add(new Color(.3,.3,.3)).clamp();
 
     // keep trying until a valid level is generated
     for(;generateLevel(););
@@ -536,7 +531,7 @@ function nextLevel()
     levelWarmup = 0;
 
     // hack, subtract off warm up time from main game timer
-    gameTimer.time += warmUpTime;
+    //gameTimer.time += warmUpTime;
     levelTimer.set();
 
     // spawn player

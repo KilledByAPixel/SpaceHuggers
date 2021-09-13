@@ -204,7 +204,7 @@ class Prop extends GameObject
         }
         else if (this.type == propType_crate_explosive)
         {
-            this.color = new Color(.3,.3,.3);
+            this.color = new Color(.2,.8,.2);
             this.canBurn = 1;
             this.explosionSize = 2;
             health = 1e3;
@@ -218,7 +218,7 @@ class Prop extends GameObject
         else if (this.type == propType_barrel_explosive)
         {
             this.tileIndex = 17;
-            this.color = new Color(.3,.3,.3);
+            this.color = new Color(.2,.8,.2);
             this.canBurn = 1;
             this.explosionSize = 2;
             health = 1e3;

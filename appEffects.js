@@ -20,7 +20,7 @@ const sound_walk =         [.3,.1,70,,,.01,4,,,,-9,.1,,,,,,.5];
 const sound_explosion =    [2,.2,72,.01,.01,.2,4,,,,,,,1,,.5,.1,.5,.02];
 const sound_checkpoint =   [.6,0,500,,.04,.3,1,2,,,570,.02,.02,,,,.04];
 const sound_rain =         [.02,,1e3,2,,2,,,,,,,,99];
-const sound_wind =         [.01,.3,2e3,2,1,2,,,,,,,1,1,,,,,,.1];
+const sound_wind =         [.01,.3,2e3,2,1,2,,,,,,,1,2,,,,,,.1];
 const sound_grenade =      [.5,.01,300,,,.02,3,.22,,,-9,.2,,,,,,.5];
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -313,33 +313,36 @@ function destroyTile(pos, makeSound = 1, cleanNeighbors = 1, maxCascadeChance = 
 
     const centerPos = pos.add(vec2(.5));
     const layerData = tileLayer.getData(pos);
-    const color = layerData ? layerData.color : new Color(1,1,1);
-    makeDebris(centerPos, color.mutate());
-    makeSound && playSound(sound_destroyTile, centerPos);
-
-    setTileCollisionData(pos, tileType_empty);
-    tileLayer.setData(pos, new TileLayerData, 1); // set and clear tile
-
-    // cleanup neighbors
-    if (cleanNeighbors)
+    if (layerData)
     {
-        for(let i=-1;i<=1;++i)
-        for(let j=-1;j<=1;++j)
-            decorateTile(pos.add(vec2(i,j)));
-    }
+        const color = layerData.color;
+        makeDebris(centerPos, color.mutate());
+        makeSound && playSound(sound_destroyTile, centerPos);
 
-    // if weak earth, random chance of delayed destruction of tile directly above
-    if (tileType == tileType_glass)
-    {
-        maxCascadeChance = 1;
-        if (getTileCollisionData(pos.add(vec2(0,-1))) == tileType)
-            new TileCascadeDestroy(pos.add(vec2(0,-1)), 1, 1);
-    }
-    else if (tileType != tileType_dirt)
-        maxCascadeChance = 0;
+        setTileCollisionData(pos, tileType_empty);
+        tileLayer.setData(pos, new TileLayerData, 1); // set and clear tile
 
-    if (rand() < maxCascadeChance && getTileCollisionData(pos.add(vec2(0,1))) == tileType)
-        new TileCascadeDestroy(pos.add(vec2(0,1)), maxCascadeChance * .4, tileType == tileType_glass);
+        // cleanup neighbors
+        if (cleanNeighbors)
+        {
+            for(let i=-1;i<=1;++i)
+            for(let j=-1;j<=1;++j)
+                decorateTile(pos.add(vec2(i,j)));
+        }
+
+        // if weak earth, random chance of delayed destruction of tile directly above
+        if (tileType == tileType_glass)
+        {
+            maxCascadeChance = 1;
+            if (getTileCollisionData(pos.add(vec2(0,-1))) == tileType)
+                new TileCascadeDestroy(pos.add(vec2(0,-1)), 1, 1);
+        }
+        else if (tileType != tileType_dirt)
+            maxCascadeChance = 0;
+
+        if (rand() < maxCascadeChance && getTileCollisionData(pos.add(vec2(0,1))) == tileType)
+            new TileCascadeDestroy(pos.add(vec2(0,1)), maxCascadeChance * .4, tileType == tileType_glass);
+    }
 
     return 1;
 }
@@ -405,9 +408,9 @@ function updateSky()
     if (!skySoundTimer.active())
     {
         skySoundTimer.set(rand(2,1));
-        playSound(skyRain ? sound_rain : sound_wind, 0, 0, skyParticles.emitRate/1e3);
+        playSound(skyRain ? sound_rain : sound_wind, skyParticlesPos, 20, skyParticles.emitRate/1e3);
         if (rand() < .1)
-            playSound(sound_wind, 0, 0, rand(skyParticles.emitRate/1e3));
+            playSound(sound_wind, skyParticlesPos, 20, rand(skyParticles.emitRate/1e3));
     }
 }
 
@@ -428,10 +431,9 @@ function generateParallaxLayers()
         tileParallaxLayer.canvas.height = parallaxSize.y;
 
         const layerColor = levelColor.mutate(.2).lerp(levelSkyColor,.9-i*.15);
-        const gradient = tileParallaxLayer.context.createLinearGradient(0,0,0,tileParallaxLayer.canvas.height);
+        const gradient = tileParallaxLayer.context.fillStyle = tileParallaxLayer.context.createLinearGradient(0,0,0,tileParallaxLayer.canvas.height);
         gradient.addColorStop(0,layerColor.rgba());
         gradient.addColorStop(1,layerColor.subtract(new Color(1,1,1,0)).mutate(.1).clamp().rgba());
-        tileParallaxLayer.context.fillStyle = gradient;
         //tileParallaxLayer.context.fillStyle = layerColor.rgba();
 
         for(let x=parallaxSize.x;x--;)

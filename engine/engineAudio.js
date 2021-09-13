@@ -17,14 +17,9 @@ let audioContext;            // main audio context
 ///////////////////////////////////////////////////////////////////////////////
 
 // play a zzfx sound in world space with attenuation and culling
-function playSound(zzfxSound, pos, range=defaultSoundRange)
+function playSound(zzfxSound, pos, range=defaultSoundRange, volumeScale=1)
 {
     if (!soundEnable) return;
-    if (!pos)
-    {
-        zzfx(...zzfxSound);
-        return;
-    }
 
     const lengthSquared = cameraPos.distanceSquared(pos);
     const maxRange = range * (soundTaperPecent + 1);
@@ -35,7 +30,7 @@ function playSound(zzfxSound, pos, range=defaultSoundRange)
     zzfxSound = [...zzfxSound];
 
     // scale volume
-    const scale = percent(lengthSquared**.5, range, maxRange);
+    const scale = volumeScale * percent(lengthSquared**.5, range, maxRange);
     zzfxSound[0] = (zzfxSound[0]||1) * scale;
     zzfx(...zzfxSound);
 }

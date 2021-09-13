@@ -42,14 +42,11 @@ class Character extends GameObject
     {
         this.gravityScale = 1; // reset default gravity (incase climbing ladder)
 
-        if (this.isDead())
+        if (this.isDead() || !this.inUpdateWindow() && !this.persistent)
         {
             super.update();
-            return;
-        }
-
-        if (!this.inUpdateWindow() && !this.persistent)
             return; // ignore offscreen objects
+        }
 
         //const lowHealth = this.health < this.healthMax/2;
         //if (lowHealth)
@@ -155,7 +152,6 @@ class Character extends GameObject
                 this.velocity.x += this.getMirrorSign(.1);
 
             // apply damage to enemies when rolling
-            if (this.isPlayer)
             forEachObject(this.pos, this.size, (o)=>
             {
                 if (o.isCharacter && o.team != this.team && !o.isDead())
@@ -338,19 +334,23 @@ class Character extends GameObject
         if (this.isDead())
             return super.collideWithObject(o);
 
-        const  m = 25*o.mass * o.velocity.lengthSquared();
-        if (!o.groundObject && o.isCrushing && !this.persistent && o.velocity.y < 0 && this.pos.y < o.pos.y - o.size.y/2 && abs(o.pos.x - this.pos.x) < o.size.x*.5)
+        if (o.velocity.lengthSquared() > .04)
         {
-            // crushing
-            this.damage(1e3, o);
-            if (this.isDead() && !this.persistent)
+            const v = o.velocity.subtract(this.velocity);
+            const  m = 25*o.mass * v.lengthSquared();
+            if (!o.groundObject && o.isCrushing && !this.persistent && o.velocity.y < 0 && this.pos.y < o.pos.y - o.size.y/2 && abs(o.pos.x - this.pos.x) < o.size.x*.5)
             {
-                makeBlood(this.pos, 300);
-                this.destroy();
+                // crushing
+                this.damage(1e3, o);
+                if (this.isDead())
+                {
+                    makeBlood(this.pos, 300);
+                    this.destroy();
+                }
             }
+            else if (m > 1)
+                this.damage(4*m|0, o)
         }
-        else if (m > 1)
-            this.damage(4*m|0, o)
 
         return super.collideWithObject(o);
     }
@@ -385,9 +385,9 @@ class Enemy extends Character
         this.shootTimer = new Timer;
         this.maxVisionRange = 12;
 
-        this.type = randSeeded()**3*min(level+2,type_count)|0;
+        this.type = randSeeded()**3*min(level+1,type_count)|0;
 
-        let health = 1;
+        let health = 1 + this.type;
         if (this.type == type_weak)
         {
             this.color = new Color(0,1,0);
@@ -403,20 +403,17 @@ class Enemy extends Character
         {
             this.color = new Color(1,0,0);
             this.eyeColor = new Color(1,1,0);
-            health = 2;
         }
         else if (this.type == type_elite)
         {
             this.color = new Color(1,1,1);
             this.eyeColor = new Color(1,0,0);
-            health = 4;
             this.maxVisionRange = 15;
         }
         else if (this.type == type_grenade)
         {
             this.color = new Color(.7,0,1);
             this.eyeColor = new Color(0,0,0);
-            health = 4;
             this.grenadeCount = 3;
         }
 
@@ -442,22 +439,11 @@ class Enemy extends Character
     
     update()
     {
-        if (this.isDead())
-        {
-            super.update();
-            return;
-        }
-
-        if (!aiEnable || levelWarmup)
-        {
-            super.update();
-            return;
-        }
-
-        if (!this.inUpdateWindow())
+        if (!aiEnable || levelWarmup || this.isDead() || !this.inUpdateWindow())
         {
             if (this.weapon)
                 this.weapon.triggerIsDown = 0;
+            super.update();
             return; // ignore offscreen objects
         }
 
@@ -519,7 +505,7 @@ class Enemy extends Character
             this.moveInput.y = 0;
 
             // random dodge
-            if (this.type == type_elite)
+            if (this.type >= type_elite)
                 this.pressedDodge = rand() < .02;
             else if (this.groundObject)
                 this.pressedDodge = rand() < .005;
@@ -566,7 +552,7 @@ class Enemy extends Character
                     }
                     
                     // random movement
-                    if (rand()<(this.isBig?.04:.02))
+                    if (rand()<(this.isBig?.05:.02))
                         this.moveInput.x = 0;
                     else if (rand()<.01)
                         this.moveInput.x = rand()<.6 ? playerDirection*rand(.5, .2) : -playerDirection*rand(.4, .2);
@@ -615,7 +601,7 @@ class Enemy extends Character
         else
         {
             // try to act normal
-            if (rand()<.01)
+            if (rand()<.03)
                 this.moveInput.x = 0;
             else if (rand()<.005)
                 this.moveInput.x = randSign()*rand(.2, .1);
@@ -701,7 +687,7 @@ class Player extends Character
         super(pos);
 
         this.grenadeCount = 3;
-        this.isPlayer = 1;
+        
         this.eyeColor = (new Color).setHSLA(-playerIndex*.6,1,.5);
         //this.color = this.color.mutate(.2);
 
@@ -716,7 +702,7 @@ class Player extends Character
         this.playerIndex = playerIndex;
         this.renderOrder = 20 + 10*playerIndex;
         this.walkSoundTime = 0;
-        this.persistent = this.wasHoldingJump = this.canBlink = 1;
+        this.persistent = this.wasHoldingJump = this.canBlink = this.isPlayer = 1;
         this.team = team_player;
         
         new Weapon(this.pos, this);
