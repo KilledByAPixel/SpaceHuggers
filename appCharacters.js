@@ -16,7 +16,7 @@ class Character extends GameObject
     { 
         super(pos, vec2(.6,.95).scale(sizeScale), 32);
 
-        this.health = this.healthMax = 1;
+        this.health = this.healthMax = this.canBurn = this.isCharacter = 1;
         this.sizeScale = sizeScale;
         this.groundTimer = new Timer;
         this.jumpTimer = new Timer;
@@ -26,19 +26,14 @@ class Character extends GameObject
         this.dodgeRechargeTimer = new Timer;
         this.deadTimer = new Timer;
         this.blinkTimer = new Timer;
-        this.walkCyclePercent = 0;
         this.moveInput = vec2();
-
         this.extraAdditiveColor = new Color(0,0,0,0);
         this.color = new Color;
         this.eyeColor = new Color;
         this.bodyTile = 3;
         this.headTile = 2;
         this.renderOrder = 10;
-        this.canBurn = 1;
-        this.isCharacter = 1;
-        this.overkill = 0;
-        this.grenadeCount = 0;
+        this.overkill = this.grenadeCount = this.walkCyclePercent = 0;
         this.grendeThrowTimer = new Timer;
         this.setCollision();
     }
@@ -47,14 +42,14 @@ class Character extends GameObject
     {
         this.gravityScale = 1; // reset default gravity (incase climbing ladder)
 
-        if (!this.inUpdateWindow() && !this.persistent)
-            return; // ignore offscreen objects
-
         if (this.isDead())
         {
             super.update();
             return;
         }
+
+        if (!this.inUpdateWindow() && !this.persistent)
+            return; // ignore offscreen objects
 
         //const lowHealth = this.health < this.healthMax/2;
         //if (lowHealth)
@@ -148,8 +143,8 @@ class Character extends GameObject
             this.extinguish();
             playSound(sound_dodge, this.pos);
 
-            if (!this.groundObject)
-                this.velocity.y += .25;
+            if (!this.groundObject && this.getAliveTime() > .2)
+                this.velocity.y += .2;
 
         }
         if (this.dodgeTimer.active())
@@ -158,6 +153,14 @@ class Character extends GameObject
             this.angle = this.getMirrorSign(2*PI*this.dodgeTimer.getPercent());
             if (this.groundObject)
                 this.velocity.x += this.getMirrorSign(.1);
+
+            // apply damage to enemies when rolling
+            if (this.isPlayer)
+            forEachObject(this.pos, this.size, (o)=>
+            {
+                if (o.isCharacter && o.team != this.team && !o.isDead())
+                    o.damage(1, this);
+            });
         }
         else
             this.angle = 0;
@@ -336,7 +339,7 @@ class Character extends GameObject
             return super.collideWithObject(o);
 
         const  m = 25*o.mass * o.velocity.lengthSquared();
-        if (!o.groundObject && o.isCrushing && o.velocity.y < 0 && this.pos.y < o.pos.y - o.size.y/2 && abs(o.pos.x - this.pos.x) < o.size.x*.5)
+        if (!o.groundObject && o.isCrushing && !this.persistent && o.velocity.y < 0 && this.pos.y < o.pos.y - o.size.y/2 && abs(o.pos.x - this.pos.x) < o.size.x*.5)
         {
             // crushing
             this.damage(1e3, o);
@@ -359,7 +362,8 @@ const type_weak   = 0;
 const type_normal = 1;
 const type_strong = 2;
 const type_elite  = 3;
-const type_count  = 4;
+const type_grenade= 4;
+const type_count  = 5;
 
 function alertEnemies(pos, playerPos, radius=2)
 {
@@ -373,26 +377,22 @@ class Enemy extends Character
     { 
         super(pos);
 
-        this.holdJumpTimer = new Timer;
-        this.shootTimer = new Timer;
-
         this.team = team_enemy;
         this.sawPlayerTimer = new Timer;
         this.reactionTimer = new Timer;
         this.facePlayerTimer = new Timer;
+        this.holdJumpTimer = new Timer;
+        this.shootTimer = new Timer;
         this.maxVisionRange = 12;
 
-        this.type = randSeeded()**3*type_count|0;
-        const h = randSeeded();
-        this.color = (new Color).setHSLA(h,1,.5);
-        this.eyeColor = (new Color).setHSLA(h+.5,1,.6);
+        this.type = randSeeded()**3*min(level+2,type_count)|0;
 
         let health = 1;
         if (this.type == type_weak)
         {
-            this.size = this.size.scale(this.sizeScale = .9);
             this.color = new Color(0,1,0);
             this.eyeColor = new Color(1,.5,0);
+            this.size = this.size.scale(this.sizeScale = .9);
         }
         else if (this.type == type_normal)
         {
@@ -412,21 +412,32 @@ class Enemy extends Character
             health = 4;
             this.maxVisionRange = 15;
         }
+        else if (this.type == type_grenade)
+        {
+            this.color = new Color(.7,0,1);
+            this.eyeColor = new Color(0,0,0);
+            health = 4;
+            this.grenadeCount = 3;
+        }
 
         if (this.isBig = randSeeded() < .05)
         {
             // chance of large enemy with extra health
             this.size = this.size.scale(this.sizeScale = 1.3);
             health *= 2;
+            this.grenadeCount *= 10;
+            this.maxVisionRange = 15;
             --levelEnemyCount;
         }
 
         this.health = this.healthMax = health;
         this.color = this.color.mutate();
-        this.patrol = rand() < .3;
 
         new Weapon(this.pos, this);
          --levelEnemyCount;
+
+
+        this.sightCheckFrame = rand(9)|0;
     }
     
     update()
@@ -456,7 +467,7 @@ class Enemy extends Character
         // update check if players are visible
         const sightCheckFrames = 9;
         ASSERT(this.sawPlayerPos || !this.sawPlayerTimer.isSet());
-        if (frame%sightCheckFrames == this.id%sightCheckFrames)
+        if (frame%sightCheckFrames == this.sightCheckFrame)
         {
             const sawRecently = this.sawPlayerTimer.isSet() && this.sawPlayerTimer.get() < 5;
             const visionRangeSquared = (sawRecently ? this.maxVisionRange * 1.2 : this.maxVisionRange)**2;
@@ -488,8 +499,7 @@ class Enemy extends Character
             }
         }
 
-        this.pressedDodge = 0;
-        this.climbingWall = 0;
+        this.pressedDodge = this.climbingWall = this.pressingThrow = 0;
         
         if (this.burnTimer.isSet())
         {
@@ -509,7 +519,7 @@ class Enemy extends Character
             this.moveInput.y = 0;
 
             // random dodge
-            if (this.type >= type_elite)
+            if (this.type == type_elite)
                 this.pressedDodge = rand() < .02;
             else if (this.groundObject)
                 this.pressedDodge = rand() < .005;
@@ -537,35 +547,41 @@ class Enemy extends Character
             else if (timeSinceSawPlayer < 5)
             {
                 debugAI && debugRect(this.pos, this.size, '#f00');
-
-                // actively fighting player
-                if (rand()<.05)
-                    this.facePlayerTimer.set(rand(2,.5));
-
-                // random jump
-                if (rand()<(this.type < type_elite ? .0005 : .005))
+                    
+                if (!this.dodgeTimer.active())
                 {
-                    this.pressedJumpTimer.set(.1);
-                    this.holdJumpTimer.set(rand(.2));
+                    const playerDirection = sign(this.sawPlayerPos.x - this.pos.x);
+                    if (this.type = type_grenade && rand() < .005 && this.getMirrorSign() == playerDirection)
+                        this.pressingThrow = 1;
+                        
+                    // actively fighting player
+                    if (rand()<.05)
+                        this.facePlayerTimer.set(rand(2,.5));
+
+                    // random jump
+                    if (rand()<(this.type != type_elite ? .0005 : .005))
+                    {
+                        this.pressedJumpTimer.set(.1);
+                        this.holdJumpTimer.set(rand(.2));
+                    }
+                    
+                    // random movement
+                    if (rand()<(this.isBig?.04:.02))
+                        this.moveInput.x = 0;
+                    else if (rand()<.01)
+                        this.moveInput.x = rand()<.6 ? playerDirection*rand(.5, .2) : -playerDirection*rand(.4, .2);
+                    if (rand()<.03)
+                        this.moveInput.y = rand()<.5 ? 0 : randSign()*rand(.4, .2);
+                
+                    // random shoot
+                    if (abs(this.sawPlayerPos.y - this.pos.y) < 4)
+                    if (!this.shootTimer.isSet() || this.shootTimer.get() > 1)
+                        rand() < (this.type > type_weak ? .02 : .01) && this.shootTimer.set(this.isBig ? rand(2,1) : rand(.1,.05));
                 }
 
-                // random movement
-                const playerDirection = sign(this.sawPlayerPos.x - this.pos.x);
-                if (rand()<(this.isBig?.04:.02))
-                    this.moveInput.x = 0;
-                else if (rand()<.01)
-                    this.moveInput.x = rand()<.6 ? playerDirection*rand(.5, .2) : -playerDirection*rand(.4, .2);
-                if (rand()<.03)
-                    this.moveInput.y = rand()<.5 ? 0 : randSign()*rand(.4, .2);
-
                 // random dodge
-                if (this.type >= type_elite)
+                if (this.type == type_elite)
                     this.pressedDodge = rand() < .01 && timeSinceSawPlayer < .5;
-                
-                // random shoot
-                if (abs(this.sawPlayerPos.y - this.pos.y) < 4)
-                if (!this.shootTimer.isSet() || this.shootTimer.get() > 2)
-                    rand() < (this.type > type_weak ? .02 : .01) && this.shootTimer.set(this.isBig ? rand(2,1) : rand(.1,.05));
             }
             else
             {
@@ -590,7 +606,7 @@ class Enemy extends Character
                 
                 // random shoot
                 if (!this.shootTimer.isSet() || this.shootTimer.get() > 5)
-                    rand() < .001 && this.shootTimer.set(rand(.3,.1));
+                    rand() < .001 && this.shootTimer.set(rand(.2,.1));
 
                 // move up/down in dirction last player was seen
                 this.moveInput.y = clamp(this.sawPlayerPos.y - this.pos.y,.5,-.5);
@@ -601,7 +617,7 @@ class Enemy extends Character
             // try to act normal
             if (rand()<.01)
                 this.moveInput.x = 0;
-            else if (rand()<.005 && this.patrol)
+            else if (rand()<.005)
                 this.moveInput.x = randSign()*rand(.2, .1);
             else if (rand()<.001)
                 this.moveInput.x = randSign()*1e-9; // hack: look in a direction
@@ -610,7 +626,7 @@ class Enemy extends Character
             this.reactionTimer.unset();
         }
 
-        if (this.isBig && this.type < type_elite)
+        if (this.isBig && this.type != type_elite)
         {
             // big enemies cant jump
             this.pressedJumpTimer.unset();
@@ -632,7 +648,7 @@ class Enemy extends Character
         {
             if (!this.reactionTimer.isSet())
             {
-                this.reactionTimer.set(rand(.8,.4)*(this.type == type_weak ? 2 : 1));
+                this.reactionTimer.set(rand(1,.5)*(this.type == type_weak ? 2 : 1));
                 this.facePlayerTimer.set(rand(2,1));
                 if (this.groundObject && rand() < .2)
                     this.velocity.y += .1; // random jump
@@ -647,6 +663,8 @@ class Enemy extends Character
     {
         if (!this.isDead())
             this.alert(damagingObject ? damagingObject.pos : this.pos, 1);
+        
+        this.reactionTimer.set(rand(1,.5));
         super.damage(damage, damagingObject);
     }
 
@@ -656,6 +674,21 @@ class Enemy extends Character
             return 0;
 
         super.kill(damagingObject);
+        levelWarmup || ++totalKills;
+
+        // check if any enemies left
+        let enemiesCount = 0;
+        for (const o of engineCollideObjects)
+        {
+            if (o.isCharacter && o.team  == team_enemy && !o.isDead())
+                ++enemiesCount;
+        }
+
+        if (!enemiesCount)
+        {
+            playerLives += 3;
+            levelEndTimer.set();
+        }
     }
 }
 
@@ -671,7 +704,6 @@ class Player extends Character
         this.isPlayer = 1;
         this.eyeColor = (new Color).setHSLA(-playerIndex*.6,1,.5);
         //this.color = this.color.mutate(.2);
-        this.extraAdditiveColor = (new Color).setHSLA(rand(),1,.05,0);
 
         if (playerIndex)
         {
@@ -684,25 +716,23 @@ class Player extends Character
         this.playerIndex = playerIndex;
         this.renderOrder = 20 + 10*playerIndex;
         this.walkSoundTime = 0;
-        this.persistent = 1;
-        this.wasHoldingJump = 1;
+        this.persistent = this.wasHoldingJump = this.canBlink = 1;
         this.team = team_player;
-        this.canBlink = 1;
-        this.health = this.healthMax = 1;
-
+        
         new Weapon(this.pos, this);
         players[playerIndex] = this;
         
         // small jump on spawn
         this.velocity.y = .2;
         this.mirror = playerIndex%2;
+        --playerLives;
     }
 
     update()
     {
         if (this.isDead())
         {
-            if (this.persistent)
+            if (this.persistent && playerLives)
             {
                 if (players.length == 1)
                 {
@@ -724,22 +754,22 @@ class Player extends Character
                         hasLivingPlayers |= (!player.isDead() && player.getAliveTime() > .1);
                     }
 
-                    if (!hasLivingPlayers)
+                    if (minDeadTime > 2)
                     {
-                        // respawn all
-                        if (minDeadTime > 2)
+                        if (!hasLivingPlayers)
                         {
+                            // respawn all
                             this.persistent = 0;
                             new Player(checkpointPos.subtract(vec2(this.playerIndex*.4,0)), this.playerIndex);
                             playSound(sound_jump, checkpointPos);
                         }
-                    }
-                    else if (checkpointTimer.active())
-                    {
-                        // respawn if checkpoint active
-                        this.persistent = 0;
-                        const player = new Player(checkpointPos, this.playerIndex);
-                        playSound(sound_jump, checkpointPos);
+                        else if (checkpointTimer.active())
+                        {
+                            // respawn if checkpoint active
+                            this.persistent = 0;
+                            const player = new Player(checkpointPos, this.playerIndex);
+                            playSound(sound_jump, checkpointPos);
+                        }
                     }
                 }
             }
@@ -771,8 +801,8 @@ class Player extends Character
 
         // controls
         this.holdingShoot  = !this.playerIndex && (mouseIsDown(0) || keyIsDown(90)) || gamepadIsDown(2, this.playerIndex);
-        this.pressingThrow = !this.playerIndex && (mouseIsDown(2) || keyIsDown(67)) || gamepadIsDown(3, this.playerIndex);
-        this.pressedDodge  = !this.playerIndex && (mouseIsDown(1) || keyIsDown(88)) || gamepadIsDown(1, this.playerIndex);
+        this.pressingThrow = !this.playerIndex && (mouseIsDown(2) || keyIsDown(67)) || gamepadIsDown(1, this.playerIndex);
+        this.pressedDodge  = !this.playerIndex && (mouseIsDown(1) || keyIsDown(88)) || gamepadIsDown(3, this.playerIndex);
 
         // jump when spawn in
         if (players.length > 1 && this.getAliveTime() < .1)
@@ -793,12 +823,12 @@ class Player extends Character
         else
             this.walkSoundTime = .5;
 
-        if (players.length > 1)
+        if (players.length > 1 && !this.isDead())
         {
             // move to other player if offscreen and multiplayer
             if (!isOverlapping(this.pos, this.size, cameraPos, gameplayWindowSize))
             {
-                // move to location of another player
+                // move to location of another player if not falling off a cliff
                 if (tileCollisionRaycast(this.pos,vec2(this.pos.x,0)))
                 {
                     for(const player of players)

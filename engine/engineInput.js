@@ -12,7 +12,7 @@
 
 const enableGamepads = 1;
 const enableTouchInput = 0;
-const copyGamepadDirectionToStick = 0;
+const copyGamepadDirectionToStick = 1;
 const copyWASDToDpad = 0;
 
 // input for all devices including keyboard, mouse, and gamepad. (d=down, p=pressed, r=released)

@@ -19,12 +19,6 @@ const team_enemy = 2;
 
 let updateWindowSize, renderWindowSize, gameplayWindowSize;
 
-const resetGame=()=>
-{
-    gameTimer.set();
-    startLevel(1);
-}
-
 engineInit(
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,8 +95,16 @@ engineInit(
         }*/
     }
 
-    if (keyWasPressed(82))
-        startLevel(level);
+    // restart if no lives left
+    let minDeadTime = 1e3;
+    for(const player of players)
+        minDeadTime = min(minDeadTime, player.isDead() ? player.deadTimer.get() : 0);
+
+    if (minDeadTime > 9)
+        resetGame();
+
+    if (levelEndTimer.get() > 3)
+        nextLevel();
 },
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +115,8 @@ engineInit(
         if (players.length == 1)
         {
             const player = players[0];
-            cameraPos = cameraPos.lerp(player.pos, clamp(player.getAliveTime()/2));
+            if (!player.isDead())
+                cameraPos = cameraPos.lerp(player.pos, clamp(player.getAliveTime()/2));
         }
         else
         {
@@ -138,7 +141,10 @@ engineInit(
         for(let i = maxPlayers;i--;)
         {
             if (!players[i] && (gamepadWasPressed(0, i)||gamepadWasPressed(1, i)))
+            {
+                ++playerLives;
                 new Player(checkpointPos, i);
+            }
         }
         
         // clamp to bottom and sides of level
@@ -164,7 +170,6 @@ engineInit(
     gradient.addColorStop(0,levelSkyColor.rgba());
     gradient.addColorStop(1,levelSkyHorizonColor.rgba());
     mainContext.fillStyle = gradient;
-
     //mainContext.fillStyle = levelSkyColor.rgba();
     mainContext.fillRect(0,0,mainCanvas.width, mainCanvas.height);
 
@@ -174,31 +179,45 @@ engineInit(
 ///////////////////////////////////////////////////////////////////////////////
 ()=> // appRenderPost
 {
-    const drawText = (text, x, y, size, alpha, color, outlineColor)=>
-    {
-        mainContext.font = size + 'in impact';
-        mainContext.lineWidth = 3;
-        mainContext.textAlign = 'center';
+    //let minAliveTime = 9;
+    //for(const player of players)
+    //    minAliveTime = min(minAliveTime, player.getAliveTime());
 
-        mainContext.fillStyle = color.scale(1,alpha).rgba();
-        mainContext.fillText(text, x, y);
+    //const livesPercent = percent(minAliveTime, 5, 4)
+    //const s = 8;
+    //const offset = 100*livesPercent;
+    //mainContext.drawImage(tileImage, 32, 8, s, s, 32, mainCanvas.height-90, s*9, s*9);
+    mainContext.textAlign = 'center';
+    const p = percent(gameTimer.get(), 8, 10);
 
-        mainContext.strokeStyle = outlineColor.scale(1,alpha).rgba();
-        mainContext.lineWidth = 2;
-        mainContext.strokeText(text, x, y);
-    }
-
-    const gameTime = gameTimer.get();
-    const p = percent(gameTime, 8, 10);
+    mainContext.font = '1.4in impact';
+    //mainContext.globalCompositeOperation = 'difference';
     if (p > 0)
     {
-        let y = 140;
-        drawText('SPACE HUGGERS',mainCanvas.width/2, y, 1.4, p, new Color().setHSLA(time/4,1,.5), new Color(0,0,0));
-        drawText('A JS13k Game by Frank Force',mainCanvas.width/2, y+=70, .6, p, new Color(1,1,1), new Color(0,0,0));
+        mainContext.fillStyle = `hsl(${time*60},80%,50%,${p})`;
+        mainContext.strokeStyle = new Color(0,0,0,p).rgba();
+        mainContext.fillText('SPACE HUGGERS', mainCanvas.width/2, 140);
+        mainContext.strokeText('SPACE HUGGERS', mainCanvas.width/2, 140);
     }
 
+    mainContext.fillStyle = new Color(0,0,0,p).rgba();
+    mainContext.font = '.6in impact';
+    p > 0 && mainContext.fillText('A JS13K Game by Frank Force',mainCanvas.width/2, 210);
+
+
+        // check if any enemies left
+        let enemiesCount = 0;
+        for (const o of engineCollideObjects)
+        {
+            if (o.isCharacter && o.team  == team_enemy && !o.isDead())
+                ++enemiesCount;
+        }
+
+
+    mainContext.fillStyle = new Color(0,0,0).rgba();
+    mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-30);
+
     // fade in level transition
-    const levelTime = levelTimer.get();
-    const fade = percent(levelTime, .5, 2);
+    const fade = levelEndTimer.isSet() ? percent(levelEndTimer.get(), 3, 1) : percent(levelTimer.get(), .5, 2);
     drawRect(cameraPos, vec2(1e3), new Color(0,0,0,fade))
 });

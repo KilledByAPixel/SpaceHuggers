@@ -11,19 +11,17 @@
 const soundEnable = 1;       // all audio can be disabled
 const defaultSoundRange = 15;// distance where taper starts
 const soundTaperPecent = .5; // extra range added for sound taper
-let audioVolume = .5;        // volume for sound, music and speech
+const audioVolume = .5;        // volume for sound, music and speech
 let audioContext;            // main audio context
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // play a zzfx sound in world space with attenuation and culling
-function playSound(zzfxSound, pos, range=defaultSoundRange, volumeScale=1)
+function playSound(zzfxSound, pos, range=defaultSoundRange)
 {
     if (!soundEnable) return;
     if (!pos)
     {
-        zzfxSound = [...zzfxSound];
-        zzfxSound[0] = (zzfxSound[0]||1) * volumeScale;
         zzfx(...zzfxSound);
         return;
     }
@@ -37,11 +35,11 @@ function playSound(zzfxSound, pos, range=defaultSoundRange, volumeScale=1)
     zzfxSound = [...zzfxSound];
 
     // scale volume
-    const scale = volumeScale * percent(lengthSquared**.5, range, maxRange);
+    const scale = percent(lengthSquared**.5, range, maxRange);
     zzfxSound[0] = (zzfxSound[0]||1) * scale;
     zzfx(...zzfxSound);
 }
-
+/*
 // render and play zzfxm music with an option to loop
 function playMusic(zzfxmMusic, loop=1) 
 {
@@ -72,35 +70,12 @@ function speak(text, language='', volume=1, rate=1, pitch=1)
 }
 
 const stopSpeech = ()=> speechSynthesis && speechSynthesis.cancel();
-
+*/
 ///////////////////////////////////////////////////////////////////////////////
 // ZzFXMicro - Zuper Zmall Zound Zynth - v1.1.8 by Frank Force
 
 const zzfxR = 44100; // sample rate
-function zzfx(...z) {zzfxP(zzfxG(...z));} // generate and play sound
-function zzfxP(...samples)  // play samples
-{
-    // wait for user input to create audio context
-    if (!soundEnable || !hadInput) return;
-    
-    // create audio context
-    if (!audioContext)
-        audioContext = new (window.AudioContext||webkitAudioContext);
-
-    // create buffer and source
-    const buffer = audioContext.createBuffer(samples.length, samples[0].length, zzfxR), 
-        source = audioContext.createBufferSource();
-
-    // copy samples to buffer and play
-    samples.map((d,i)=> buffer.getChannelData(i).set(d));
-    source.buffer = buffer;
-    source.connect(audioContext.destination);
-    source.start();
-    return source;
-}
-
-function zzfxG // generate samples
-(
+function zzfx(
     // parameters
     volume = 1, randomness = .05, frequency = 220, attack = 0, sustain = 0,
     release = .1, shape = 0, shapeCurve = 1, slide = 0, deltaSlide = 0,
@@ -180,9 +155,27 @@ function zzfxG // generate samples
         }
     }
     
-    return b;
-}
 
+
+    // wait for user input to create audio context
+    if (!soundEnable || !hadInput) return;
+    
+    // create audio context
+    if (!audioContext)
+        audioContext = new (window.AudioContext||webkitAudioContext);
+
+    // create buffer and source
+    const buffer = audioContext.createBuffer(1, b.length, zzfxR), 
+        source = audioContext.createBufferSource();
+
+    // copy samples to buffer and play
+    buffer.getChannelData(0).set(b);
+    source.buffer = buffer;
+    source.connect(audioContext.destination);
+    source.start();
+    return source;
+}
+/*
 ///////////////////////////////////////////////////////////////////////////////
 // ZzFX Music Renderer v2.0.3 by Keith Clark and Frank Force
 
@@ -283,4 +276,4 @@ function zzfxM(instruments, patterns, sequence, BPM = 125)
   }
 
   return [leftChannelBuffer, rightChannelBuffer];
-}
+}*/

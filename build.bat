@@ -84,7 +84,7 @@ type build\index.js >> build\index.html
 echo ^</script^> >> build\index.html
 
 rem minify the png
-call imagemin a.png > build\a.png
+call imagemin tiles.png > build\tiles.png
 if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b %errorlevel%
@@ -92,8 +92,8 @@ if %ERRORLEVEL% NEQ 0 (
 
 rem zip the result
 cd build
-rem call advzip -a -4 -i 99 ..\%name%.zip index.html a.png
-call ..\ect -9 -strip -zip ..\%name%.zip index.html a.png
+rem call advzip -a -4 -i 99 ..\%name%.zip index.html
+call ..\ect -9 -strip -zip ..\%name%.zip index.html
 if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b %errorlevel%
@@ -104,4 +104,4 @@ copy index.html ..\index.min.html
 cd ..
 rmdir /s /q build
 
-rem pause to see result
+rem pause to see result        ect -9 -strip -zip js13k.zip index.html

@@ -34,11 +34,7 @@ const randColor    = (cA = new Color, cB = new Color(0,0,0,1), linear)=>
 
 // seeded random numbers - Xorshift
 let randSeed       = 0;
-const randSeeded   = (a=1, b=0)=>
-{
-    randSeed ^= randSeed << 13; randSeed ^= randSeed >>> 17; randSeed ^= randSeed << 5;
-    return b + (a-b)*abs(randSeed % 1e9)/1e9;
-}
+const randSeeded   = (a=1, b=0)=> b + (a-b)* (Math.sin(++randSeed)**2 * 1e5 % 1);
 
 // create a 2d vector, can take another Vector2 to copy, 2 scalars, or 1 scalar
 const vec2 = (x=0, y)=> x.x == undefined? new Vector2(x, y == undefined? x : y) : new Vector2(x.x, x.y);
@@ -59,7 +55,6 @@ class Vector2
     // vector math operators
     length()              { return this.lengthSquared()**.5; }
     lengthSquared()       { return this.x**2 + this.y**2; }
-    simpleLength()        { return abs(this.x) + abs(this.y); }
     distance(p)           { return this.distanceSquared(p)**.5; }
     distanceSquared(p)    { return (this.x - p.x)**2 + (this.y - p.y)**2; }
     normalize(length=1)   { const l = this.length(); return l ? this.scale(length/l) : new Vector2(length); }
@@ -88,7 +83,6 @@ class Color
     add(c)      { return new Color(this.r+c.r, this.g+c.g, this.b+c.b, this.a+c.a); }
     subtract(c) { return new Color(this.r-c.r, this.g-c.g, this.b-c.b, this.a-c.a); }
     multiply(c) { return new Color(this.r*c.r, this.g*c.g, this.b*c.b, this.a*c.a); }
-    divide(c)   { return new Color(this.r/c.r, this.g/c.g, this.b/c.b, this.a/c.a); }
     scale(s,a=s){ return new Color(this.r*s, this.g*s, this.b*s, this.a*a); }
     clamp()     { return new Color(clamp(this.r), clamp(this.g), clamp(this.b), clamp(this.a)); }
     lerp(c, p)  { return this.add(c.subtract(this).scale(clamp(p))); }
@@ -139,6 +133,5 @@ class Timer
     active()        { return time <= this.time; }  // is set and has no time left
     elapsed()       { return time >  this.time; }  // is set and has time left
     get()           { return this.isSet()? time - this.time : 0; }
-    getTimeLeft()   { return this.isSet()? this.time - time : 0; }
     getPercent()    { return this.isSet()? percent(this.time - time, 0, this.setTime) : 0; }
 }

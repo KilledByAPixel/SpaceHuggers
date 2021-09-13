@@ -24,7 +24,6 @@ const defaultObjectAngleDamping = .99;
 const defaultObjectElasticity = 0;
 const defaultObjectFriction = .8;
 const maxObjectSpeed = 1;
-let nextUniqueObjectID = 0;
 
 class EngineObject
 {
@@ -38,7 +37,6 @@ class EngineObject
         this.tileSize = tileSize;
         this.angle = angle;
         this.color = color;
-        this.id = nextUniqueObjectID++;
 
         // set physics defaults
         this.mass         = defaultObjectMass;

@@ -23,7 +23,7 @@
 // engine config
 
 const engineName = 'LittleJS';
-const engineVersion = 'v0.67';
+const engineVersion = 'v0.72';
 const FPS = 60, timeDelta = 1/FPS;
 const defaultFont = 'arial'; // font used for text rendering
 const maxWidth = 1920, maxHeight = 1200; // up to 1080p and 16:10
@@ -33,7 +33,7 @@ const fixedWidth = 0; // native resolution
 //const fixedWidth = 240,  fixedHeight = 136; // TIC-80
 
 // tile sheet settings
-const defaultTilesFilename = 'a.png'; // everything goes in one tile sheet
+//const defaultTilesFilename = 'a.png'; // everything goes in one tile sheet
 const defaultTileSize = vec2(16); // default size of tiles in pixels
 const tileBleedShrinkFix = .3;    // prevent tile bleeding from neighbors
 const pixelated = 1;              // use crisp pixels for pixel art
@@ -48,8 +48,7 @@ let cameraPos=vec2(), cameraScale=4*max(defaultTileSize.x, defaultTileSize.y);
 let tileImageSize, tileImageSizeInverse, shrinkTilesX, shrinkTilesY, drawCount;
 
 const tileImage = new Image(); // the tile image used by everything
-function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost, 
-    tileImageFilename=defaultTilesFilename, canvas)
+function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost)
 {
     // init engine when tiles load
     tileImage.onload = ()=>
@@ -61,10 +60,9 @@ function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost,
         shrinkTilesY = tileBleedShrinkFix/tileImageSize.y;
 
         // setup html
-        document.body.appendChild(mainCanvas = canvas || document.createElement('canvas'));
-        document.body.style = 'margin:0;background:#000;overflow:hidden';
-        mainCanvas.style = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)' // center
-            + (pixelated?';image-rendering:crisp-edges;image-rendering:pixelated':'')          // pixelated rendering
+        document.body.appendChild(mainCanvas = document.createElement('canvas'));
+        document.body.style = 'margin:0;overflow:hidden';
+        mainCanvas.style = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);image-rendering:crisp-edges;image-rendering:pixelated';          // pixelated rendering
         mainContext = mainCanvas.getContext('2d');
 
         debugInit();
@@ -180,8 +178,8 @@ function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost,
         glCopyToContext(mainContext);
     }
 
-    ASSERT(!tileImage.src);
-    tileImage.src = tileImageFilename + '?' + rand(1e9); // prevent browser image cache
+    tileImage.src = 
+`data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABABAMAAAAg+GJMAAAAJ1BMVEUADbj///+AgID/AAAAAACJT6T/dwBIG11mlD2i91azs7PZ2dlAQECB66IOAAAAAXRSTlMAQObYZgAAAoRJREFUeNqsk8dZw0AQhWfNiHDbARfgVAB0sNI3LTgcfSLcbasC0o0j6panHIYMT+FX+p8y/UdECJnNJlTn6PJnft4wEvHFasCkis2JakItl9dpemjZxgniywInnhX2hWAxXug0NIwKcduwjRTpF8hVLp7PJDSEuE5X24ofFZAQV7cAEZtDQ4jLJcSKgzuAXD8DDuVDdGOFmWjNaPN0v1zdPtU0BTSIi8cQY60ZPWcQ715r2oIzeqFupBQbZqVY0xY8PT1RN6zIh7QP8TTL+lcwmiE1megkRagif1DgvB8WsAILbQpYgZ2aD8kWsGLMUSybdfMpm1tgDRiJzfr7P5MteGufDpXchoE4jGcKj32C2oBKsM5jlPUlT4VKyN9TdFuSwKsfqrLHTcE5ucQgKL8H+GZW2n0YZptZKUXSXhIUic4nfa4OXrPPNmXTxI8BwzCBFcP6DjGxfwFmmwIwBv548/sccBJqPGRK10uYu5YCtRkD/r3xc8AEELDOk6ZAn3OHXR7h19D8OAckE3ukFiAkyb7V+lPXAqecd/8DYCSAkAGK+r37W3fhDZYCQqg4ICS/HKjNQsACbuYYRHLmHLh1BFfRHikKevd0dwATAQzTW3Dv7n8DKCrsZSF51wLh2hssfCOGQTLoegvZrn/j0iIlVEyKLSDjk0VaWGVjZERCQpHLqwywcEzIlbCChLArx1SbpQBgjITB5+f88l6bw+tLnbzW2eZWJQGEOMwKk3hz4JQnuy8FIH4tw+T2QNkNzSmeA0eA7T0BgFMc8mQox9qsCiQIY+AwDO/bNSOk4zaMIxxyvi8AMAW2xwcH1o+w/hHXf+P6RVq/yo86pjXn/PT09LTsL3dlHSBbTLmdAAAAAElFTkSuQmCC`;
 }
 
 function engineUpdateObjects()
@@ -201,15 +199,6 @@ function engineUpdateObjects()
     engineObjects = engineObjects.filter(o=>!o.destroyed);
     engineCollideObjects = engineCollideObjects.filter(o=>!o.destroyed);
     time = ++frame / FPS;
-}
-
-function destroyAllObjects()
-{
-    // remove all objects that are not persistnt or are descendants of something persitant
-    for(const o of engineObjects)
-        o.persistent || o.parent || o.destroy();
-
-    engineObjects = engineObjects.filter(o=>!o.destroyed);
 }
 
 function forEachObject(pos, size=0, callbackFunction=(o)=>1, collideObjectsOnly=1)

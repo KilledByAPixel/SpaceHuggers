@@ -12,8 +12,7 @@ class GameObject extends EngineObject
     {
         super(pos, size, tileIndex, tileSize, angle);
         this.isGameObject = 1;
-        this.health = this.healthMax = 0;
-        this.canBurn = 0;
+        this.health = this.healthMax = this.canBurn = 0;
         this.burnDelay = .1;
         this.burnTime = 3;
         this.damageTimer = new Timer;
@@ -26,7 +25,7 @@ class GameObject extends EngineObject
 
     update()
     {
-        if (this.parent || this.persistent || this.inUpdateWindow()) // pause physics if outside update window
+        if (this.parent || this.persistent || !this.groundObject || this.inUpdateWindow()) // pause physics if outside update window
             super.update();
 
         if (!this.isLavaRock)
@@ -41,7 +40,7 @@ class GameObject extends EngineObject
                 this.additiveColor = new Color(0,0,0,0);
         }
         
-        if (!this.parent && this.pos.y < -2)
+        if (!this.parent && this.pos.y < -1)
         {
             // kill and destroy if fall below level
             this.kill();
@@ -88,6 +87,13 @@ class GameObject extends EngineObject
 
         if (godMode && this.isPlayer)
             return;
+
+        if (this.team == team_player)
+        {
+            // safety window after spawn
+            if (godMode || this.getAliveTime() < 2)
+                return;
+        }
 
         if (instant)
         {
@@ -184,8 +190,8 @@ class Prop extends GameObject
 
         const type = this.type = (typeOverride != undefined ? typeOverride : rand()**2*propType_count|0);
         let health = 5;
-        let tileIndex = 16;
-        let explosionSize = 0;
+        this.tileIndex = 16;
+        this.explosionSize = 0;
         if (this.type == propType_crate_wood)
         {
             this.color = new Color(1,.5,0);
@@ -200,63 +206,60 @@ class Prop extends GameObject
         {
             this.color = new Color(.3,.3,.3);
             this.canBurn = 1;
-            explosionSize = 2;
+            this.explosionSize = 2;
             health = 1e3;
         }
         else if (this.type == propType_barrel_metal)
         {
-            tileIndex = 17;
+            this.tileIndex = 17;
             this.color = new Color(.9,.9,1);
             health = 10;
         }
         else if (this.type == propType_barrel_explosive)
         {
-            tileIndex = 17;
+            this.tileIndex = 17;
             this.color = new Color(.3,.3,.3);
             this.canBurn = 1;
-            explosionSize = 2;
+            this.explosionSize = 2;
             health = 1e3;
         }
         else if (this.type == propType_barrel_highExplosive)
         {
-            tileIndex = 17;
+            this.tileIndex = 17;
             this.color = new Color(1,.1,.1);
             this.canBurn = 1;
-            explosionSize = 3;
+            this.explosionSize = 3;
             this.burnTimeDelay = 0;
             this.burnTime = rand(.5,.1);
             health = 1e3;
         }
         else if (this.type == propType_barrel_water)
         {
-            tileIndex = 17;
+            this.tileIndex = 17;
             this.color = new Color(0,.6,1);
             health = .01;
         }
         else if (this.type == propType_rock || this.type == propType_rock_lava)
         {
-            tileIndex = 18;
+            this.tileIndex = 18;
             this.color = new Color(.8,.8,.8).mutate(.2);
             health = 30;
-            this.mass *= 5;
+            this.mass *= 4;
             if (rand() < .2)
             {
                 health = 99;
-                this.mass *= 5;
+                this.mass *= 4;
                 this.size = this.size.scale(2);
                 this.pos.y += .5;
             }
             this.isCrushing = 1;
 
-            if (rand() < .05)
-                this.type = propType_rock_lava;
-        }
-
-        if (this.type == propType_rock_lava)
-        {
-            this.color = new Color(1,.9,0);
-            this.additiveColor = new Color(1,0,0);
-            this.isLavaRock = 1;    
+            if (this.type == propType_rock_lava)
+            {
+                this.color = new Color(1,.9,0);
+                this.additiveColor = new Color(1,0,0);
+                this.isLavaRock = 1;    
+            }
         }
 
         // randomly angle and flip axis (90 degree rotation)
@@ -264,8 +267,6 @@ class Prop extends GameObject
         if (rand() < .5)
             this.size = this.size.flip();
 
-        this.explosionSize = explosionSize;
-        this.tileIndex = tileIndex;
         this.mirror = rand() < .5;
         this.health = this.healthMax = health;
         this.setCollision(1, 1);
@@ -345,7 +346,7 @@ class Checkpoint extends GameObject
         const height = 4;
         const color = activeCheckpoint == this ? new Color(1,0,0) : new Color;
         const a = Math.sin(time*4+this.pos.x);
-        drawRect(this.pos.add(vec2(.5,height-.3-.5-.03*a)), vec2(1,.6), color, a*.06);  
+        drawTile(this.pos.add(vec2(.5,height-.3-.5-.03*a)), vec2(1,.6), 14, undefined, color, a*.06);  
         drawRect(this.pos.add(vec2(0,height/2-.5)), vec2(.1,height), new Color(.9,.9,.9));
     }
 }
@@ -408,14 +409,8 @@ class Weapon extends EngineObject
         super(pos, vec2(.6), 4, vec2(8));
 
         // weapon settings
-        this.localOffset = vec2(.55,0);
         this.isWeapon = 1;
-        this.fireRate = 8;
-        this.fireTimeBuffer = 0;
-        this.bulletSpeed = .5;
-        this.bulletRange = 8;
-        this.spread = .1;
-        this.localAngle = 0;
+        this.fireTimeBuffer = this.localAngle = 0;
         this.recoilTimer = new Timer;
 
         this.addChild(this.shellEmitter = new ParticleEmitter(
@@ -432,12 +427,17 @@ class Weapon extends EngineObject
         this.renderOrder = parent.renderOrder+1;
 
         parent.weapon = this;
-        parent.addChild(this, this.localOffset);
+        parent.addChild(this, this.localOffset = vec2(.55,0));
     }
 
     update()
     {
         super.update();
+
+        const fireRate = 8;
+        const bulletSpeed = .5;
+        const bulletRange = 8;
+        const spread = .1;
 
         this.mirror = this.parent.mirror;
         this.fireTimeBuffer += timeDelta;
@@ -448,16 +448,16 @@ class Weapon extends EngineObject
         if (this.triggerIsDown)
         {
             // slow down enemy bullets
-            const speed = this.bulletSpeed * (this.parent.team == team_player ? 1 : .5);
-            const rate = 1/this.fireRate;
+            const speed = bulletSpeed * (this.parent.team == team_player ? 1 : .5);
+            const rate = 1/fireRate;
             for(; this.fireTimeBuffer > 0; this.fireTimeBuffer -= rate)
             {
                 this.localAngle = -rand(.2,.15);
                 this.recoilTimer.set(rand(.4,.3));
                 const bullet = new Bullet(this.pos, this.parent);
                 const direction = vec2(this.getMirrorSign(speed), 0);
-                bullet.velocity = direction.rotate(rand(this.spread,-this.spread));
-                bullet.range = this.bulletRange;
+                bullet.velocity = direction.rotate(rand(spread,-spread));
+                bullet.range = bulletRange;
 
                 this.shellEmitter.localAngle = -.8*this.getMirrorSign();
                 this.shellEmitter.emitParticle();
@@ -487,21 +487,18 @@ class Bullet extends EngineObject
     { 
         super(pos, vec2(0));
         this.color = new Color(1,1,0,1);
-        this.lastVelocity = this.velocity.copy();
+        this.lastVelocity = this.velocity;
         this.setCollision();
 
-        this.damage = 1;
-        this.damping = 1;
+        this.damage = this.damping = 1;
         this.gravityScale = 0;
         this.attacker = attacker;
-        if (attacker)
-            this.team = attacker.team;
+        this.team = attacker.team;
     }
 
     update()
     {
-        this.lastPos = this.pos.copy();
-        this.lastVelocity = this.velocity.copy();
+        this.lastVelocity = this.velocity;
         super.update();
 
         this.range -= this.velocity.length();
@@ -521,12 +518,6 @@ class Bullet extends EngineObject
             return;
         }
 
-        if (this.range < 0)
-        {
-            this.kill();
-            return;
-        }
-
         // check if hit someone
         forEachObject(this.pos, this.size, (o)=>
         {
@@ -542,7 +533,13 @@ class Bullet extends EngineObject
         {
             o.damage(this.damage, this);
             o.applyForce(this.velocity.scale(.1));
-            this.kill();
+            if (o.isCharacter)
+            {
+                playSound(sound_walk, this.pos);
+                this.destroy();
+            }
+            else
+                this.kill();
         }
     
         return 1; 
@@ -556,6 +553,7 @@ class Bullet extends EngineObject
         const destroyTileChance = data == tileType_glass ? 1 : data == tileType_dirt ? .2 : .05;
         rand() < destroyTileChance && destroyTile(pos);
         this.kill();
+
         return 1; 
     }
 
@@ -573,10 +571,10 @@ class Bullet extends EngineObject
             1, 1, .5, PI, .1,  // damping, angleDamping, gravityScale, particleCone, fadeRate, 
             .5, 1, 1           // randomness, collide, additive, randomColorLinear, renderOrder
         );
-        
         emitter.trailScale = 1;
         emitter.angle = this.lastVelocity.angle() + PI;
-        playSound(sound_bulletHit, this.pos);
+
+        //playSound(sound_bulletHit, this.pos);
         this.destroy();
     }
 

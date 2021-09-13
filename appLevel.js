@@ -21,14 +21,13 @@ const tileRenderOrder = -1e3;
 const tileBackgroundRenderOrder = -2e3;
 
 // level objects
-let players=[], tileLayer, tileBackgroundLayer;
+let players=[], playerLives, tileLayer, tileBackgroundLayer, totalKills;
 
 // level settings
-let levelSize, level, levelSeed, levelEnemyCount;
+let levelSize, level, levelSeed, levelEnemyCount, levelWarmup;
 let levelColor, levelBackgroundColor, levelSkyColor, levelSkyHorizonColor, levelGroundColor;
 let skyParticles, skyRain, skySoundTimer = new Timer;
-let levelWarmup = 0;
-let gameTimer = new Timer, levelTimer = new Timer;
+let gameTimer = new Timer, levelTimer = new Timer, levelEndTimer = new Timer;
 
 let tileBackground;
 const setTileBackgroundData = (pos, data=0)=>
@@ -38,6 +37,13 @@ const getTileBackgroundData = (pos)=>
 
 ///////////////////////////////////////////////////////////////////////////////
 // level generation
+
+const resetGame=()=>
+{
+    levelEndTimer.unset();
+    gameTimer.set(totalKills = level = 0);
+    nextLevel(playerLives = 10);
+}
 
 function buildTerrain(size)
 {
@@ -102,37 +108,35 @@ function buildTerrain(size)
     }
 
     // add random holes
-    for(let i=199; i--;)
+    for(let i=levelSize.x; i--;)
     {
         const pos = vec2(rand(levelSize.x), rand(levelSize.y-19, 19));
         for(let x = rand(9,1)|0;--x;)
         for(let y = rand(9,1)|0;--y;)
-        {
-            const p = pos.add(vec2(x,y));
-            if (y > 1 && randSeeded() < .1 && getTileCollisionData(p) == tileType_dirt)
-                new Prop(p.add(vec2(0,.5)), propType_rock);
-            setTileCollisionData(p, tileType_empty);
-        }
+            setTileCollisionData(pos.add(vec2(x,y)), tileType_empty);
     }
 }
 
-function spawnProps(pos, type)
+function spawnProps(pos)
 {
-    new Prop(pos, type);
-    const propPlaceSize = .51;
-    if (randSeeded() < .2)
+    if (abs(checkpointPos.x-pos.x) > 5)
     {
-        // 3 triangle prop stack
-        new Prop(pos.add(vec2(propPlaceSize*2,0)), type);
+        new Prop(pos);
+        const propPlaceSize = .51;
         if (randSeeded() < .2)
-            new Prop(pos.add(vec2(propPlaceSize,propPlaceSize*2)), type);
-    }
-    else if (randSeeded() < .2)
-    {
-        // 3 column prop stack
-        new Prop(pos.add(vec2(0,propPlaceSize*2)), type);
-        if (randSeeded() < .2)
-            new Prop(pos.add(vec2(0,propPlaceSize*4)), type);
+        {
+            // 3 triangle prop stack
+            new Prop(pos.add(vec2(propPlaceSize*2,0)));
+            if (randSeeded() < .2)
+                new Prop(pos.add(vec2(propPlaceSize,propPlaceSize*2)));
+        }
+        else if (randSeeded() < .2)
+        {
+            // 3 column prop stack
+            new Prop(pos.add(vec2(0,propPlaceSize*2)));
+            if (randSeeded() < .2)
+                new Prop(pos.add(vec2(0,propPlaceSize*4)));
+        }
     }
 }
 
@@ -154,8 +158,8 @@ function buildBase()
     const cave = rand() < .5;
     const baseBottomCenterPos = raycastHit.int();
     const baseSize = randSeeded(20,9)|0;
-    const baseFloors = cave? 1 : randSeeded(7,1)|0;
-    const basementFloors = randSeeded(cave?8:4, 0)|0;
+    const baseFloors = cave? 1 : randSeeded(6,1)|0;
+    const basementFloors = randSeeded(cave?7:4, 0)|0;
     let floorBottomCenterPos = baseBottomCenterPos.subtract(vec2(0,basementFloors*6));
     floorBottomCenterPos.y = max(floorBottomCenterPos.y, 9); // prevent going through bottom
 
@@ -249,16 +253,14 @@ function buildBase()
         }
 
         // spawn crates
-        const propCount = randSeeded(.5*floorWidth)|0;
-        const propType = isCaveFloor && rand() < .8 ? propType_rock : undefined;
+        const propCount = randSeeded(floorWidth/2)|0;
         for(let i = propCount; i--;)
-            spawnProps(floorBottomCenterPos.add(vec2(randSeeded( floorWidth-2,-floorWidth+2),.5)), propType);
+            spawnProps(floorBottomCenterPos.add(vec2(randSeeded( floorWidth-2,-floorWidth+2),.5)));
 
         if (topFloor || floorSpace > 1)
         {
             // spawn enemies
-            const enemyCount = randSeeded(floorWidth)|0;
-            for(let i = enemyCount; i--;)
+            for(let i = propCount; i--;)
             {
                 const pos = floorBottomCenterPos.add(vec2(randSeeded( floorWidth-1,-floorWidth+1),.7));
                 new Enemy(pos);
@@ -273,11 +275,26 @@ function buildBase()
     }
 
     //checkpointPos = floorBottomCenterPos.copy(); // start player on base
+
+    // spawn random enemies and props
+    for(let i=20;levelEnemyCount>0&&i--;)
+    {
+        const pos = vec2(floorBottomCenterPos.x + randSeeded(99, -99), levelSize.y);
+        raycastHit = tileCollisionRaycast(pos, vec2(pos.x, 0));
+        // must not be near player start
+        if (raycastHit && abs(checkpointPos.x-pos.x) > 20)
+        {
+            const pos = raycastHit.add(vec2(0,2));
+            randSeeded() < .7 ? new Enemy(pos) : spawnProps(pos);
+        }
+    }
 }
 
 function generateLevel()
 {
-    destroyAllObjects();
+    levelEndTimer.unset();
+    engineObjects = [];
+    engineCollideObjects = [];
 
     // randomize ground level hills
     buildTerrain(levelSize);
@@ -291,17 +308,10 @@ function generateLevel()
 
         // start on either side of level
         //checkpointPos = vec2(randSeeded(levelSize.x-20,20), levelSize.y);
-        checkpointPos = vec2(levelSize.x/2 + (levelSize.x/2-10-randSeeded(20))*(randSeeded()<.5?-1:1) | 0, levelSize.y);
+        checkpointPos = vec2(levelSize.x/2 + (levelSize.x/2-10-randSeeded(9))*(randSeeded()<.5?-1:1) | 0, levelSize.y);
         raycastHit = tileCollisionRaycast(checkpointPos, vec2(checkpointPos.x, 0));
     }
     checkpointPos = raycastHit.add(vec2(0,1));
-
-    // only ground below a ceratin level needs background
-    // holes in background above ceratin level
-
-    // different regions of rock/dirt
-    // canyons
-    // rocks and caves
 
     // random bases until there enough enemies
     for(let tries=99;levelEnemyCount>0;)
@@ -311,25 +321,12 @@ function generateLevel()
 
         if (buildBase())
             return 1;
-
-        // spawn random enemies and props
-        for(let i=20;levelEnemyCount>0&&i--;)
-        {
-            const pos = vec2(randSeeded(20, levelSize.x-20), levelSize.y);
-            raycastHit = tileCollisionRaycast(pos, vec2(pos.x, 0));
-            // must not be near player start
-            if (raycastHit && abs(checkpointPos.x-pos.x) > 20)
-            {
-                const pos = raycastHit.add(vec2(0,2));
-                randSeeded() < .7 ? new Enemy(pos) : spawnProps(pos);
-            }
-        }
     }
 
     // build checkpoints
-    for(let x=0; x<levelSize.x; )
+    for(let x=0; x<levelSize.x-9; )
     {
-        x += rand(100,70)
+        x += rand(100,70);
         const pos = vec2(x, levelSize.y);
         raycastHit = tileCollisionRaycast(pos, vec2(pos.x, 0));
         // must not be near player start
@@ -350,25 +347,6 @@ function generateLevel()
             (checkBackground ? getTileBackgroundData(o.pos) : getTileCollisionData(o.pos)) > 0 && o.destroy();
         }
     });
-
-    // can be tech style or caves
-    // random pos, size
-    // find ground level, lowest level in that area
-
-
-    // add ladders
-
-    // 2 to 3 high floors with 1 to 2 in between
-
-    // 1 high craw ways
-
-
-    // add underground areas
-
-    // create background based on foreground
-
-    // round off corvers
-
 }
 
 const groundTileStart = 8;
@@ -527,20 +505,14 @@ function applyArtToLevel()
     }
 }
 
-function startLevel(level_)
+function nextLevel()
 {
-    // clear players
-    // todo: let player keep stats
-    for(const player of players)
-        player.persistent = 0;
-    players = [];
-
-    level = level_;
+    levelEnemyCount = 15 + min(level * 30, 300);
+    ++level;
     gravity = -.01;
     levelSeed = randSeed = rand(1e9)|0;
     randomizeLevelParams();
-    levelSize = vec2(400,200);
-    levelEnemyCount = 200;
+    levelSize = vec2(min(level*99,400),200);
 
     // keep trying until a valid level is generated
     for(;generateLevel(););
@@ -555,7 +527,7 @@ function startLevel(level_)
 
     updateWindowSize = vec2(1e9);
     cameraPos = checkpointPos;
-    const warmUpTime = 2;
+    const warmUpTime = 5;
     for(let i=warmUpTime * FPS; i--;)
     {
         updateSky();
@@ -568,6 +540,7 @@ function startLevel(level_)
     levelTimer.set();
 
     // spawn player
+    players = [];
     new Player(checkpointPos);
     //new Enemy(checkpointPos.add(vec2(3))); // test enemy
 }

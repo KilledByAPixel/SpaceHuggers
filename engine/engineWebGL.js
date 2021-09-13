@@ -91,9 +91,11 @@ function glSetBlendMode(additive)
 
     // setup blending
     glAdditive = additive;
-    glContext.blendFuncSeparate(
+
+    glContext.blendFunc(gl_SRC_ALPHA, additive ? gl_ONE : gl_ONE_MINUS_SRC_ALPHA)
+    /*glContext.blendFuncSeparate(
         gl_SRC_ALPHA, additive ? gl_ONE : gl_ONE_MINUS_SRC_ALPHA, 
-        gl_ONE,       additive ? gl_ONE : gl_ONE_MINUS_SRC_ALPHA);
+        gl_ONE,       additive ? gl_ONE : gl_ONE_MINUS_SRC_ALPHA);*/
     glContext.enable(gl_BLEND);
 }
 

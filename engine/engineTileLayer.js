@@ -37,12 +37,12 @@ function tileCollisionTest(pos, size=vec2(), object)
 {
     // check if there is collision in a given area
     // fixes problem with positions between -1 going to 0
-    const minX = max(pos.x - size.x*.5+1|0, 1)-1;
-    const minY = max(pos.y - size.y*.5+1|0, 1)-1;
-    const maxX = min(pos.x + size.x*.5+1|0, tileCollisionSize.x);
-    const maxY = min(pos.y + size.y*.5+1|0, tileCollisionSize.y);
-    for(let y = minY; y < maxY; ++y)
-    for(let x = minX; x < maxX; ++x)
+    const minX = pos.x - size.x*.5|0;
+    const minY = pos.y - size.y*.5|0;
+    const maxX = pos.x + size.x*.5|0;
+    const maxY = pos.y + size.y*.5|0;
+    for(let y = minY; y <= maxY; ++y)
+    for(let x = minX; x <= maxX; ++x)
     {
         const tileData = tileCollision[y*tileCollisionSize.x + x];
         if (tileData && (object ? object.collideWithTile(tileData, new Vector2(x, y)) : tileData > 0))
@@ -60,7 +60,7 @@ function tileCollisionRaycast(posStart, posEnd, object)
     const posDelta = posEnd.subtract(posStart);
     const dx = abs(posDelta.x),  dy = -abs(posDelta.y);
     const sx = sign(posDelta.x), sy = sign(posDelta.y);
-    let err = dx + dy;
+    let e = dx + dy;
 
     for(let x = posStart.x, y = posStart.y;;)
     {
@@ -74,9 +74,9 @@ function tileCollisionRaycast(posStart, posEnd, object)
 
         // update Bresenham line drawing algorithm
         if (x == posEnd.x & y == posEnd.y) break;
-        const e2 = 2*err;
-        if (e2 >= dy) err += dy, x += sx;
-        if (e2 <= dx) err += dx, y += sy;
+        const e2 = 2*e;
+        if (e2 >= dy) e += dy, x += sx;
+        if (e2 <= dx) e += dx, y += sy;
     }
     debugRaycast && debugLine(posStart, posEnd, '#00f',.02, 1);
 }
@@ -253,24 +253,4 @@ class TileLayer extends EngineObject
     }
 
     drawRect(pos, size, color, angle) { this.drawTile(pos, size, -1, 0, color, angle, 0); }
-
-    drawText(text, pos, size=1, color=new Color, lineWidth=0, lineColor=new Color(0,0,0), textAlign='center', font=defaultFont)
-    {
-        // draw text in world space without canvas scaling because that messes up fonts
-        pos = pos.subtract(this.pos).multiply(this.tileSize);
-        size *= this.tileSize;
-
-        const context = this.context;
-        context.font = size + 'px '+ font;
-        context.textAlign = textAlign;
-        context.textBaseline = 'middle';
-        if (lineWidth)
-        {
-            context.lineWidth = lineWidth*this.tileSize.x;
-            context.strokeStyle = lineColor.rgba();
-            context.strokeText(text, pos.x, pos.y);
-        }
-        context.fillStyle = color.rgba();
-        context.fillText(text, pos.x, pos.y);
-    }
 }
