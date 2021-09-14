@@ -6,12 +6,15 @@ Explore strange planets using your tools of destruction to wipe out hoards of in
 ![Screenshot](/screenshot.png)
 
 # How To Play
-- Use D-Pad or WASD to move
+- Use WASD or D-Pad to move
 - Z or Left click to shoot
-- X or middle click - Roll - breif invulnurabilty, does melee damage, boots, and puts out fire.
-- C or right click - Grenade - 3 per life, use wisely.
-- Kill all enemies to complete the level. There is a radar on the bottom of the screen.
+- X or Middle click - Roll - breif invulnurabilty, does melee damage, boots, and puts out fire.
+- C or Right click - Grenade - 3 per life, use wisely.
+- Kill all enemies to complete the level.
+- You start with 9 lives and get 3 extra lives for completing each level.
+- There is a radar along the bottom of the screen showing nearby enemies.
 - You can also use a Xbox style controller, connect up to 4 for co-op play!
+- For optimal play experience use Chrome in full screen mode.
 
 # Features
 - Custom game engine written during the compo I will release separatly soon.
@@ -22,27 +25,27 @@ Explore strange planets using your tools of destruction to wipe out hoards of in
 - Fire propogation and exposions sytem.
 - Multi layer procedurally genreated paralax background.
 - Starfield simulation with stars and plantes.
-- Particle system for rain, snow, blood, explosions, weapons, water and more.
-- Native resolution rendering.
+- Particle systems for rain, snow, blood, explosions, weapons, water and more.
+- Native resolution rendering up to 1920x1200.
 - Up to 4 player co-op with 4 gamepads.
 - 11 different sound effects with [ZzFX](https://github.com/KilledByAPixel/ZzFX)
 
 # Enemy Types
-- New Recruit (green) - A bit shorter, more hesitant, takes only 1 hit.
-- Soldier (blue) - Normal height, takes 2 hits.
-- Captain (red) - Can climb walls, takes 3 hits.
-- Specalist (white) - Can roll, climb, and jump often, takes 4 hits.
-- Demolitions Expert (purple) - Throws grenades, can't catch fire. Takes 5 hits!
-- Each enemy can also come in a larger size that has double health and fires full auto.
+- New Recruit (Green) - A bit shorter, more hesitant, takes only 1 hit.
+- Soldier (Blue) - Normal height, takes 2 hits.
+- Captain (Red) - Can climb walls, takes 3 hits.
+- Specalist (White) - Can roll, climb, and jump often, melee, takes 4 hits.
+- Demolitions Expert (Purple) - Throws grenades and can't catch fire, takes 5 hits.
+- Each enemy also come in a larger size that has double health and fires full auto.
 
 # Props
-- Wood Crate - Burns easily and breaks when fully burnt.
-- Metal Crate / Metal Barrel - Is hard to destroy, can't burn.
-- Explosive Crate / Explosive Barrel - Burns and explodes after a few seconds.
-- Water Barrel - Puts out fires and pushes away objects
-- High Explosive Barrel - Explodes quickly and much larger then normal explosives.
-- Rock - Extra heavy and hard to destroy, can crush enemies
-- Lava Rock - Anything that touches it is lit on fire.
+- Wood Crate (Brown) - Burns easily and breaks when fully burnt.
+- Metal Crate & Barrel (Gray) - Is hard to destroy, can't burn.
+- Explosive Crate & Barrel (Green) - Burns and explodes after a few seconds.
+- Water Barrel (Blue) - Puts out fires and pushes away objects
+- High Explosive Barrel (Red) - Explodes quickly and much larger then normal explosives.
+- Rock (Color Varies) - Extra heavy and hard to destroy, can crush enemies
+- Lava Rock (Glowing Red & Orange) - Anything that touches it is lit on fire.
 
 # Tools Used
 - [Roadroller](https://github.com/lifthrasiir/roadroller)
