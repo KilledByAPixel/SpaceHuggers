@@ -24,7 +24,7 @@ Good luck, have fun, and give space a hug for me.
 - There is no end, but for a challenge, try beating the first 5 levels.
 
 # Game Features
-- Run and gun roguelike platformer
+- Run and gun, roguelike, platformer hybrid gameplay
 - 2-4 player jump in local co-op mode
 - Procedural level generation of great variety and complexity
 - Levels are fully destructible with persistence
