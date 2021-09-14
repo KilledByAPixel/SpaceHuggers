@@ -21,13 +21,13 @@ Good luck, have fun, and give space a hug for me.
 - A radar along the bottom of the screen shows nearby enemies.
 - You start with 9 lives and get 3 more for completing each level.
 - For an optimal play experience please use Chrome in full screen mode.
-- There is no end, but for a challenge, try speed running the first 5 levels.
+- There is no end, but for a challenge, try beating the first 5 levels.
 
 # Game Features
 - Run and gun roguelike platformer
 - 2-4 player jump in local co-op mode
 - Procedural level generation of great variety and complexity
-- Levels are fully destructible with persistentance
+- Levels are fully destructible with persistence
 - Fire propagation and explosion system
 - 5 enemy types with a larger variant
 - 7 different crate/barrel/rock types
