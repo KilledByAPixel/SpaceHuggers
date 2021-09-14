@@ -93,6 +93,9 @@ engineInit(
             randomizeLevelParams();
             applyArtToLevel();
         }*/
+
+        if (keyWasPressed(82))
+            resetGame();
     }
 
     // restart if no lives left
