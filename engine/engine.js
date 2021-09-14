@@ -67,7 +67,7 @@ function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost)
 
         debugInit();
         glInit();
-        appInit && appInit();
+        appInit();
         engineUpdate();
     };
 
@@ -77,7 +77,7 @@ function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost)
         requestAnimationFrame(engineUpdate);
         
         if (!document.hasFocus())
-            clearInput(); // clear input when lost focus
+            inputData[0].length = 0; // clear input when lost focus
 
         // prepare to update time
         const realFrameTimeDeltaMS = frameTimeMS - frameTimeLastMS;
@@ -111,9 +111,9 @@ function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost)
         for (;frameTimeBufferMS >= 0; frameTimeBufferMS -= 1e3 / FPS)
         {
             // main frame update
-            appUpdate && appUpdate();
+            appUpdate();
             engineUpdateObjects();
-            appUpdatePost && appUpdatePost();
+            appUpdatePost();
             debugUpdate();
 
             // update input
@@ -150,12 +150,12 @@ function engineInit(appInit, appUpdate, appUpdatePost, appRender, appRenderPost)
 
         // render sort then render while removing destroyed objects
         glPreRender(mainCanvas.width, mainCanvas.height);
-        appRender && appRender();
+        appRender();
         engineObjects.sort((a,b)=> a.renderOrder - b.renderOrder);
         for(const o of engineObjects)
             o.destroyed || o.render();
         glCopyToContext(mainContext);
-        appRenderPost && appRenderPost();
+        appRenderPost();
         debugRender();
 
         if (showWatermark)

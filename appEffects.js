@@ -107,9 +107,9 @@ function makeWater(pos, amount=400)
     const radius = 3;
     forEachObject(pos, 3, (o)=> 
     {
-        if (o.isGameObject && o.burnTimer.isSet())
+        if (o.isGameObject)
         {
-            o.extinguish();
+            o.burnTimer.isSet() && o.extinguish();
             const d = o.pos.distance(pos);
             const p = percent(d, radius/2, radius);
             const force = o.pos.subtract(pos).normalize(p*radius*.2);
@@ -423,14 +423,14 @@ function generateParallaxLayers()
     tileParallaxLayers = [];
     for(let i=0; i<3; ++i)
     {
-        const parallaxSize = vec2(600,300), startGroundLevel = rand(130,150);
+        const parallaxSize = vec2(600,300), startGroundLevel = rand(99,120)+i*30;
         const tileParallaxLayer = tileParallaxLayers[i] = new TileLayer(vec2(), parallaxSize);
         let groundLevel = startGroundLevel, groundSlope = rand(1,-1);
         tileParallaxLayer.renderOrder = -3e3+i;
         tileParallaxLayer.canvas.width = parallaxSize.x;
         tileParallaxLayer.canvas.height = parallaxSize.y;
 
-        const layerColor = levelColor.mutate(.2).lerp(levelSkyColor,.9-i*.15);
+        const layerColor = levelColor.mutate(.2).lerp(levelSkyColor,.95-i*.15);
         const gradient = tileParallaxLayer.context.fillStyle = tileParallaxLayer.context.createLinearGradient(0,0,0,tileParallaxLayer.canvas.height);
         gradient.addColorStop(0,layerColor.rgba());
         gradient.addColorStop(1,layerColor.subtract(new Color(1,1,1,0)).mutate(.1).clamp().rgba());

@@ -21,7 +21,7 @@ class GameObject extends EngineObject
         this.additiveColor = new Color(0,0,0,0);
     }
 
-    inUpdateWindow() { return isOverlapping(this.pos, this.size, cameraPos, updateWindowSize); }
+    inUpdateWindow() { return levelWarmup || isOverlapping(this.pos, this.size, cameraPos, updateWindowSize); }
 
     update()
     {
@@ -448,7 +448,7 @@ class Weapon extends EngineObject
         if (this.triggerIsDown)
         {
             // slow down enemy bullets
-            const speed = bulletSpeed * (this.parent.team == team_player ? 1 : .5);
+            const speed = bulletSpeed * (this.parent.isPlayer ? 1 : .5);
             const rate = 1/fireRate;
             for(; this.fireTimeBuffer > 0; this.fireTimeBuffer -= rate)
             {

@@ -148,15 +148,16 @@ class Character extends GameObject
         {
             // update roll
             this.angle = this.getMirrorSign(2*PI*this.dodgeTimer.getPercent());
-            if (this.groundObject)
-                this.velocity.x += this.getMirrorSign(.1);
 
-            // apply damage to enemies when rolling
-            forEachObject(this.pos, this.size, (o)=>
-            {
-                if (o.isCharacter && o.team != this.team && !o.isDead())
-                    o.damage(1, this);
-            });
+                if (this.groundObject)
+                    this.velocity.x += this.getMirrorSign(.1);
+
+                // apply damage to enemies when rolling
+                forEachObject(this.pos, this.size, (o)=>
+                {
+                    if (o.isCharacter && o.team != this.team && !o.isDead())
+                        o.damage(1, this);
+                });
         }
         else
             this.angle = 0;
@@ -415,6 +416,7 @@ class Enemy extends Character
             this.color = new Color(.7,0,1);
             this.eyeColor = new Color(0,0,0);
             this.grenadeCount = 3;
+            this.canBurn = 0;
         }
 
         if (this.isBig = randSeeded() < .05)
@@ -537,7 +539,7 @@ class Enemy extends Character
                 if (!this.dodgeTimer.active())
                 {
                     const playerDirection = sign(this.sawPlayerPos.x - this.pos.x);
-                    if (this.type = type_grenade && rand() < .005 && this.getMirrorSign() == playerDirection)
+                    if (this.type == type_grenade && rand() < .002 && this.getMirrorSign() == playerDirection)
                         this.pressingThrow = 1;
                         
                     // actively fighting player
@@ -562,7 +564,7 @@ class Enemy extends Character
                     // random shoot
                     if (abs(this.sawPlayerPos.y - this.pos.y) < 4)
                     if (!this.shootTimer.isSet() || this.shootTimer.get() > 1)
-                        rand() < (this.type > type_weak ? .02 : .01) && this.shootTimer.set(this.isBig ? rand(2,1) : rand(.1,.05));
+                        rand() < (this.type > type_weak ? .02 : .01) && this.shootTimer.set(this.isBig ? rand(2,1) : .05);
                 }
 
                 // random dodge
@@ -624,7 +626,7 @@ class Enemy extends Character
         super.update();
 
         // override default mirror
-        if (this.facePlayerTimer.active())
+        if (this.facePlayerTimer.active() && !this.dodgeTimer.active())
             this.mirror = this.sawPlayerPos.x < this.pos.x;
     }
 
@@ -819,7 +821,10 @@ class Player extends Character
                 {
                     for(const player of players)
                         if (player != this && !player.isDead())
+                        {
                             this.pos = player.pos.copy();
+                            this.velocity = vec2();
+                        }
                 }
                 else
                     this.kill();

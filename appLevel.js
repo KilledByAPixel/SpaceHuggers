@@ -99,7 +99,7 @@ function buildTerrain(size)
                  frontTile = tileType_dirt;
 
             let backTile = tileType_empty;
-            if (y < groundLevel + backgroundDelta && canayonWidth <= 0)
+            if (y < groundLevel + backgroundDelta)
                  backTile = tileType_dirt;
             
             setTileCollisionData(pos, frontTile);
@@ -170,7 +170,7 @@ function buildBase()
         const topFloor = floor == baseFloors;
         const groundFloor = !floor;
         const isCaveFloor = cave ? rand() < .8 | (floor == 0 && rand() < .6): 0;
-        let floorHeight = isCaveFloor ? randSeeded(12,2)|0 : topFloor? 0 : groundFloor? randSeeded(9,4)|0 : randSeeded(7,2)|0;
+        let floorHeight = isCaveFloor ? randSeeded(9,2)|0 : topFloor? 0 : groundFloor? randSeeded(9,4)|0 : randSeeded(7,2)|0;
         const floorSpace = topFloor ? 4 : max(floorHeight - 1, 0);
 
         let backWindow = rand() < .5;
@@ -520,9 +520,7 @@ function nextLevel()
 
     applyArtToLevel();
 
-    updateWindowSize = vec2(1e9);
-    cameraPos = checkpointPos;
-    const warmUpTime = 5;
+    const warmUpTime = 2;
     for(let i=warmUpTime * FPS; i--;)
     {
         updateSky();

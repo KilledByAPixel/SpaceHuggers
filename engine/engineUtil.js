@@ -34,7 +34,7 @@ const randColor    = (cA = new Color, cB = new Color(0,0,0,1), linear)=>
 
 // seeded random numbers - Xorshift
 let randSeed       = 0;
-const randSeeded   = (a=1, b=0)=> b + (a-b)* (Math.sin(++randSeed)**2 * 1e5 % 1);
+const randSeeded   = (a=1, b=0)=> b + (a-b)* (Math.sin(++randSeed)**2 * 1e9 % 1);
 
 // create a 2d vector, can take another Vector2 to copy, 2 scalars, or 1 scalar
 const vec2 = (x=0, y)=> x.x == undefined? new Vector2(x, y == undefined? x : y) : new Vector2(x.x, x.y);

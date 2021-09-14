@@ -195,7 +195,7 @@ engineInit(
     if (p > 0)
     {
         //mainContext.fillStyle = (new Color).setHSLA(time/3,1,.5,p).rgba();
-        mainContext.font = 1+Math.sin(time)*.5+'in impact';
+        mainContext.font = '1.5in impact';
         mainContext.fillText('SPACE HUGGERS', mainCanvas.width/2, 140);
     }
 
@@ -207,11 +207,16 @@ engineInit(
     for (const o of engineCollideObjects)
     {
         if (o.isCharacter && o.team  == team_enemy && !o.isDead())
+        {
             ++enemiesCount;
+
+            const pos = vec2(mainCanvas.width/2 + (o.pos.x - cameraPos.x)*30,mainCanvas.height-20);
+            drawRectScreenSpace(pos, o.size.scale(20), o.color.scale(1,.6));
+        }
     }
 
     mainContext.fillStyle = new Color(0,0,0).rgba();
-    mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-30);
+    mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-40);
 
     // fade in level transition
     const fade = levelEndTimer.isSet() ? percent(levelEndTimer.get(), 3, 1) : percent(levelTimer.get(), .5, 2);
