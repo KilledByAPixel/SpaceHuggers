@@ -15,6 +15,7 @@ Explore strange planets using your tools of destruction to wipe out hordes of in
 - A radar along the bottom of the screen shows nearby enemies.
 - You start with 9 lives and get 3 extra lives for completing each level.
 - For optimal play experience use Chrome in full screen mode.
+- There is no end, but for a challenge you can try to speed run X number of levels.
 
 # Game Features
 - Platforming run and gun style gameplay.
