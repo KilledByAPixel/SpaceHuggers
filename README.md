@@ -1,7 +1,11 @@
 # S P A C E H U G G E R S
 A JS13k Game by Frank Force
 
-Explore strange planets using your tools of destruction to wipe out hordes of invading space marines. Up to 3 friends can join for co-op multiplayer!
+The empire is spreading throughout the galaxy like a virus and building outposts.
+You are an elite rebel operative tasked with wiping out entire enemy bases.
+Explore strange planets using your tools of destruction to eliminate the invaders.
+You have only 10 clones left, 3 more will be replenished after each mission.
+Good luck, have fun, and give space a hug for me.
 
 # [PLAY SPACE HUGGERS!](https://js13kgames.com/entries/space-huggers)
 
@@ -21,7 +25,7 @@ Explore strange planets using your tools of destruction to wipe out hordes of in
 
 # Game Features
 - Platforming run and gun style gameplay.
-- 2-4 player jump in co-op mode.
+- 2-4 player jump in local co-op mode.
 - Procedural level generation of great variety and complexity.
 - Levels are fully destructible with persistent debris.
 - Fire propagation and explosion system.
