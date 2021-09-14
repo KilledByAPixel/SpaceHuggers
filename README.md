@@ -8,9 +8,10 @@ Explore strange planets using your tools of destruction to wipe out hoards of in
 # How To Play
 - Use D-Pad or WASD to move
 - Z or Left click to shoot
-- X or middle click - Roll - breif invulnurabilty, does melee damage, and puts out fire.
+- X or middle click - Roll - breif invulnurabilty, does melee damage, boots, and puts out fire.
 - C or right click - Grenade - 3 per life, use wisely.
-- You can also use a Xbox style controller, connect up to 4 for co-op play.
+- Kill all enemies to complete the level. There is a radar on the bottom of the screen.
+- You can also use a Xbox style controller, connect up to 4 for co-op play!
 
 # Features
 - Custom game engine written during the compo I will release separatly soon.
@@ -18,6 +19,7 @@ Explore strange planets using your tools of destruction to wipe out hoards of in
 - Physics engine for rectangular and non rotating rigid body collisons.
 - Procedurally generated levels with great variety and complexity.
 - Levels are fully destructible with persistant debris.
+- Fire propogation and exposions sytem.
 - Multi layer procedurally genreated paralax background.
 - Starfield simulation with stars and plantes.
 - Particle system for rain, snow, blood, explosions, weapons, water and more.
