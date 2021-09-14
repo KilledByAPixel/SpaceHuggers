@@ -3,6 +3,8 @@ A JS13k Game by Frank Force
 
 Explore strange planets using your tools of destruction to wipe out hordes of invading space marines. Up to 3 friends can join for co-op multiplayer!
 
+# [PLAY SPACE HUGGERS!](https://js13kgames.com/entries/space-huggers)
+
 ![Screenshot](/screenshot.png)
 
 # How To Play
