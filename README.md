@@ -20,7 +20,7 @@ Good luck, have fun, and give space a hug for me.
 - Kill all enemies to complete the level.
 - A radar along the bottom of the screen shows nearby enemies.
 - You start with 9 lives and get 3 more for completing each level.
-- For an optimal play experience use Chrome in full screen mode.
+- For an optimal play experience please use Chrome in full screen mode.
 - There is no end, but for a challenge, try speed running the first 5 levels.
 
 # Game Features
