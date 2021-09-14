@@ -19,8 +19,8 @@ Good luck, have fun, and give space a hug for me.
 - You can also use a Xbox style controller, connect up to 4 for co-op play!
 - Kill all enemies to complete the level.
 - A radar along the bottom of the screen shows nearby enemies.
-- You start with 9 lives and get 3 extra lives for completing each level.
-- For optimal play experience use Chrome in full screen mode.
+- You start with 9 lives and get 3 more for completing each level.
+- For an optimal play experience use Chrome in full screen mode.
 - There is no end, but for a challenge, try speed running the first 5 levels.
 
 # Game Features
