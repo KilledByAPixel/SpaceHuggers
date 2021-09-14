@@ -27,7 +27,7 @@ Explore strange planets using your tools of destruction to wipe out hordes of in
 - Fire propagation and explosion system.
 - 5 enemy types with a larger variant.
 - 7 different crate/barrel/rock types.
-- 17 sprite textures using a 12 color pallet.
+- 17 sprite textures using a 12 color palette.
 - Multi layer procedurally generated parallax background.
 - Starfield simulation with stars and planets.
 - Particle systems for rain, snow, blood, explosions, weapons, water and more.
