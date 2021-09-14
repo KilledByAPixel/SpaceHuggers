@@ -14,7 +14,7 @@ Good luck, have fun, and give space a hug for me.
 # How To Play
 - Use WASD or D-Pad to move
 - Z or Left click to shoot
-- X or Middle click - Roll -  brief invulnerability, does melee damage, boots, and puts out fire.
+- X or Middle click - Roll -  brief invulnerability, does damage, gives a boost, and puts out fire.
 - C or Right click - Grenade - 3 per life, use wisely.
 - You can also use a Xbox style controller, connect up to 4 for co-op play!
 - Kill all enemies to complete the level.
