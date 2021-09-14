@@ -1,7 +1,7 @@
 # S P A C E H U G G E R S
 A JS13k Game by Frank Force
 
-The empire is spreading throughout the galaxy like a virus and building outposts.
+The empire is spreading like a virus throughout the galaxy and building outposts.
 You are an elite rebel operative tasked with wiping out entire enemy bases.
 Explore strange planets using your tools of destruction to eliminate the invaders.
 You have only 10 clones left, 3 more will be replenished after each mission.
