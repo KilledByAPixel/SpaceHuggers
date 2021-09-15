@@ -12,17 +12,17 @@ Good luck, have fun, and give space a hug for me.
 ![Screenshot](/screenshot.png)
 
 # How To Play
-- Use WASD or D-Pad to move
+- Use WASD or D-Pad to move, jump, and climb
 - Z or Left click to shoot - Most things will break, some will burn
-- X or Middle click - Roll - brief invulnerability, does damage, gives a boost, puts out fire.
-- C or Right click - Grenade - 3 per life, use wisely.
-- You can also use a Xbox style controller, connect up to 4 for co-op play!
-- Kill all enemies to complete the level.
+- X or Middle click - Roll - brief invulnerability, does damage, gives a boost, puts out fire
+- C or Right click - Grenade - 3 per life, use wisely
+- You can also use a Xbox or SNES style controller, connect up to 4 for co-op play!
+- Kill all enemies to complete the level
 - You can climb walls by jumping, but to get real high try a grenade jump!
-- A radar along the bottom of the screen shows nearby enemies.
-- You start with 9 lives and get 3 more for completing each level.
-- For an optimal play experience please use Chrome in full screen mode.
-- There is no end, but for a challenge, try beating the first 5 levels.
+- A radar along the bottom of the screen shows nearby enemies
+- You start with 9 lives and get 3 more for completing each level
+- For an optimal play experience please use Chrome in full screen mode
+- There is no end, but for a challenge, try beating the first 5 levels
 
 # Game Features
 - Run and gun, roguelike, platformer hybrid gameplay
