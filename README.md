@@ -63,7 +63,7 @@ Good luck, have fun, and give space a hug for me.
 - Explosive Crate & Barrel (Green) - Burns and explodes after a few seconds
 - Water Barrel (Blue) - Puts out fires and pushes away objects
 - High Explosive Barrel (Red) - Explodes quickly and much larger than normal explosives
-- Rock (Color Varies) - Extra heavy and hard to destroy, can crush enemies
+- Rock (Color Varies) - Heavy and very hard to destroy, can't burn, can crush enemies
 - Lava Rock (Glowing Red & Orange) - Anything that touches it is lit on fire
 
 # Tools Used
