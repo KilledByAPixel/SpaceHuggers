@@ -46,8 +46,8 @@ Good luck, have fun, and give space a hug for me.
 - Particle effects system
 - Tile based rendering and collision system
 - Input processing system for keyboard, mouse, gamepads, and touch
-- Debug system not in JS13K build. (press ~ to enter debug mode)
 - Audio with ZzFX with ability to attenuate sounds by distance
+- Debug system not in JS13K build. (press ~ to enter debug mode)
 
 # Enemy Types
 - New Recruit (Green) - A bit shorter, more hesitant, takes only 1 hit
