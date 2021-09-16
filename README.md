@@ -33,7 +33,7 @@ Good luck, have fun, and give space a hug for me.
 - 7 different crate/barrel/rock types
 - 17 sprite textures using a 12 color palette
 - Multi layer procedurally generated parallax background
-- Starfield simulation with stars and planets
+- Starfield simulation with moving stars, planets, and suns
 - Particle systems for rain, snow, blood, explosions, weapons, water and more
 - Native resolution rendering up to 1920x1200
 - 11 different sound effects with [ZzFX](https://github.com/KilledByAPixel/ZzFX)
@@ -43,9 +43,10 @@ Good luck, have fun, and give space a hug for me.
 - Custom game engine written during the compo is separate from game code
 - Super fast rendering system for up to 50,000 objects at 60 fps
 - Physics engine for axis aligned bounding box rigid body dynamics
-- Particle effects system
 - Tile based rendering and collision system
+- Particle effects system
 - Input processing system for keyboard, mouse, gamepads, and touch
+- Math library and utility classes Vector2, Color and Timer
 - Audio with ZzFX with ability to attenuate sounds by distance
 - Debug system not in JS13K build. (press ~ to enter debug mode)
 
@@ -53,15 +54,15 @@ Good luck, have fun, and give space a hug for me.
 - New Recruit (Green) - A bit shorter, more hesitant, takes only 1 hit
 - Soldier (Blue) - Normal height, takes 2 hits
 - Captain (Red) - Can climb walls, takes 3 hits
-- Specialist (White) - Can roll, climb, and jump often, melee, takes 4 hits
+- Specialist (White) - Can roll, climb, melee, and jumps often, takes 4 hits
 - Demolitions Expert (Purple) - Throws grenades and can't catch fire, takes 5 hits
 - Small chance of larger size enemy that has double health and fires full auto
 
 # Props
 - Wood Crate (Brown) - Burns easily and breaks when fully burnt
 - Metal Crate & Barrel (Gray) - Is hard to destroy, can't burn
-- Explosive Crate & Barrel (Green) - Burns and explodes after a few seconds
 - Water Barrel (Blue) - Puts out fires and pushes away objects
+- Explosive Crate & Barrel (Green) - Burns and explodes after a few seconds
 - High Explosive Barrel (Red) - Explodes quickly and much larger than normal explosives
 - Rock (Color Varies) - Heavy and very hard to destroy, can't burn, can crush enemies
 - Lava Rock (Glowing Red & Orange) - Anything that touches it is lit on fire
