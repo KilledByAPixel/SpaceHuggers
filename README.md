@@ -42,7 +42,7 @@ Good luck, have fun, and give space a hug for me.
 # Engine Features
 - Custom game engine written during the compo is separate from game code
 - Super fast rendering system for up to 50,000 objects at 60 fps
-- Physics engine for rectangular and non rotating rigid body collisions
+- Physics engine for axis aligned bounding box rigid body dynamics
 - Particle effects system
 - Tile based rendering and collision system
 - Input processing system for keyboard, mouse, gamepads, and touch
