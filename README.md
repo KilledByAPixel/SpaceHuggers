@@ -23,16 +23,14 @@ Good luck, have fun, and give space a hug for me.
 - For an optimal play experience please use Chrome in full screen mode
 - There is no end, but for a challenge, try beating the first 5 levels
 
-# Hints
+# Gameplay Tips
 - Roll to put out fire!
 - Rolling also does melee damage to enemies
-- Roll recharges every 2 seconds, there is a slight flash on the player
 - Keep your distance from the specialists (white), they roll and flip often!
 - You can hold down jump to climb up walls
 - Jump flip to get more vertical height (roll immediately after jumping)
-- To reach really high places try a grenade jump, it's fun!
-- Try to touch checkpoints first before clearing out the area
-- You can press R to restart
+- To reach really high places try a grenade jump!
+- You can press R to restart the game
 
 # Game Features
 - Run and gun / roguelike hybrid gameplay
@@ -71,7 +69,7 @@ Good luck, have fun, and give space a hug for me.
 - Small chance of a heavy weapons variation that has double health and fires full auto
 
 # Props
-- Wood Crate (Brown) - Burns easily and breaks when fully burnt
+- Plastic Crate (Brown) - Burns easily and breaks when fully burnt
 - Metal Crate & Barrel (Gray) - Is hard to destroy, can't burn
 - Water Barrel (Blue) - Puts out fires and pushes away objects
 - Explosive Crate & Barrel (Green) - Burns and explodes after a few seconds
