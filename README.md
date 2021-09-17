@@ -1,9 +1,9 @@
 # S P A C E H U G G E R S
 A JS13k Game by Frank Force
 
-The empire is spreading like a plague across the galaxy and building outposts everywhere.
-You are an elite rebel soldier tasked with wiping out their bases.
-Explore strange planets using your tools of destruction to eliminate the invaders!
+The empire is spreading like a plague across the galaxy and building outposts on remote planets.
+You are an elite rebel soldier tasked with wiping out those bases.
+Explore strange planets using your tools of destruction and eliminate the invaders!
 You have only 10 clones left, 3 more will be replenished after each mission.
 Good luck, have fun, and give space a hug for me.
 
