@@ -2,7 +2,7 @@
 A JS13k Game by Frank Force
 
 The empire is spreading like a plague across the galaxy and building outposts everywhere.
-You are an elite rebel operative tasked with wiping out entire bases.
+You are an elite rebel soldier tasked with wiping out their bases.
 Explore strange planets using your tools of destruction to eliminate the invaders!
 You have only 10 clones left, 3 more will be replenished after each mission.
 Good luck, have fun, and give space a hug for me.
@@ -19,12 +19,23 @@ Good luck, have fun, and give space a hug for me.
 - You can also use a Xbox or SNES style controller, connect up to 4 for co-op play!
 - Kill all enemies to complete the level
 - A radar along the bottom of the screen shows nearby enemies
-- You start with 9 lives and get 3 more for completing each level
+- You start with 10 lives and get 3 more for completing each level
 - For an optimal play experience please use Chrome in full screen mode
 - There is no end, but for a challenge, try beating the first 5 levels
 
+# Hints
+- Roll to put out fire!
+- Rolling also does melee damage to enemies
+- Roll recharges every 2 seconds, there is a slight flash on the player
+- Keep your distance from the specialists (white), they roll and flip often!
+- You can hold down jump to climb up walls
+- Jump flip to get more vertical height (roll immediately after jumping)
+- To reach really high places try a grenade jump, it's fun!
+- Try to touch checkpoints first before clearing out the area
+- You can press R to restart
+
 # Game Features
-- Run and gun, roguelike, platformer hybrid gameplay
+- Run and gun / roguelike hybrid gameplay
 - 2-4 player jump in local co-op mode
 - Procedural level generation of great variety and complexity
 - Levels are fully destructible with persistence
@@ -32,6 +43,7 @@ Good luck, have fun, and give space a hug for me.
 - 5 enemy types with a larger variant
 - 7 different crate/barrel/rock types
 - 17 sprite textures using a 12 color palette
+- Checkpoints can be captured for players to respawn there
 - Multi layer procedurally generated parallax background
 - Starfield simulation with moving stars, planets, and suns
 - Particle systems for rain, snow, blood, explosions, weapons, water and more
@@ -46,17 +58,17 @@ Good luck, have fun, and give space a hug for me.
 - Tile based rendering and collision system
 - Particle effects system
 - Input processing system for keyboard, mouse, gamepads, and touch
-- Math library and utility classes Vector2, Color and Timer
-- Audio with ZzFX with ability to attenuate sounds by distance
-- Debug system not in JS13K build. (press ~ to enter debug mode)
+- Math library with Vector2, Color and Timer utility classes
+- Audio with ZzFX has ability to attenuate sounds by distance
+- Debug visualization system not in JS13K build. (press ~ to enter debug mode)
 
 # Enemy Types
 - New Recruit (Green) - A bit shorter, more hesitant, takes only 1 hit
-- Soldier (Blue) - Normal height, takes 2 hits
-- Captain (Red) - Can climb walls, takes 3 hits
-- Specialist (White) - Can roll, climb, melee, and jumps often, takes 4 hits
+- Soldier (Blue) - Average height and ability, takes 2 hits
+- Captain (Red) - Can climb walls and jumps more often, takes 3 hits
+- Specialist (White) - Jumps and rolls often, they are ninjas, takes 4 hits
 - Demolitions Expert (Purple) - Throws grenades and can't catch fire, takes 5 hits
-- Small chance of larger size enemy that has double health and fires full auto
+- Small chance of a heavy weapons variation that has double health and fires full auto
 
 # Props
 - Wood Crate (Brown) - Burns easily and breaks when fully burnt
