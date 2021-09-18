@@ -1,4 +1,3 @@
-@@ -1,93 +0,0 @@
 # S P A C E H U G G E R S
 A JS13k Game by Frank Force
 
