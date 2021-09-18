@@ -3,14 +3,6 @@ rem minfies and combines index.html and index.js and zips the result
 
 set name=app
 
-rem install these command line tools if necessary
-rem npm install -g google-closure-compiler
-rem npm install -g terser
-rem npm install -g uglify
-rem npm install -g roadroller
-rem npm install --global imagemin-cli
-rem npm install -g advzip-bin
-
 rem go to top of project
 cd ..
 cd ..
@@ -55,7 +47,7 @@ type app.js >> build\index.js
 echo.>> build\index.js
 
 rem minify code with closure
-call google-closure-compiler --js build\index.js --js_output_file build\index.js --compilation_level ADVANCED --language_out ECMASCRIPT_2019 --warning_level VERBOSE --jscomp_off * --assume_function_wrapper
+rem call google-closure-compiler --js build\index.js --js_output_file build\index.js --compilation_level ADVANCED --language_out ECMASCRIPT_2019 --warning_level VERBOSE --jscomp_off * --assume_function_wrapper
 if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b %errorlevel%
@@ -68,7 +60,7 @@ rem echo 0 > build\index.js
 rem type build\indexStrict.js >> build\index.js
 
 rem more minification with uglify or terser (they both are about the same)
-call uglifyjs -o build\index.js --compress --mangle -- build\index.js
+rem call uglifyjs -o build\index.js --compress --mangle -- build\index.js
 rem call terser -o build\index.js --compress --mangle -- build\index.js
 if %ERRORLEVEL% NEQ 0 (
     pause
@@ -76,7 +68,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 rem roadroaller compresses the code better then zip
-call roadroller build\index.js -o build\index.js
+rem call roadroller build\index.js -o build\index.js
 if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b %errorlevel%
