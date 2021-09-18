@@ -86,8 +86,7 @@ Good luck, have fun, and give space a hug for me.
 - [ZzFX](https://github.com/KilledByAPixel/ZzFX)
 
 # How to build the 13k Zip
-- build.bat is the old school bat file that builds the 13k zip
-- Use npm to install the necessary tools listed at the top of the file...
+- Run engine\build\setupBuild.bat to install the necessary tools via npm
 - You will need: google-closure-compiler, uglify, roadroller, imagemin-cli, and advzip
-- run build.bat to build app.zip which is the final result
-- the final zip size may vary by 20 bytes or so due to randomness of roadroller
+- Run engine\build\build.bat, to build app.zip which is the final result
+- The zip size may vary by 20 bytes or so due to randomness of roadroller
