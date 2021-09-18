@@ -22,10 +22,7 @@ let debugPhysics = 0;
 let debugParticles = 0;
 let debugCanvas = -1;
 let debugTakeScreenshot;
-let maxGifSeconds = 10;
-
-// gif capture
-let gifSize = vec2(256), gifTimer = new Timer, gifCanvas, gifProcessing, gif;
+let downloadLink;
 
 // debug helper functions
 const ASSERT = enableAsserts ? (...assert)=> console.assert(...assert) : ()=>{};
@@ -44,7 +41,11 @@ const debugLine = (posA, posB, color, thickness=.1, time)=>
 }
 
 const debugSaveCanvas = (canvas, filename = engineName + '.png') =>
-    download(canvas.toDataURL('image/png').replace('image/png','image/octet-stream'), filename, 'image/png');
+{
+    downloadLink.download = "screenshot.png";
+    downloadLink.href = canvas.toDataURL('image/png').replace('image/png','image/octet-stream');
+    downloadLink.click();
+}
 const debugAABB = (pA, pB, sA, sB, color)=>
 {
     const minPos = vec2(min(pA.x - sA.x/2, pB.x - sB.x/2), min(pA.y - sA.y/2, pB.y - sB.y/2));
@@ -57,8 +58,9 @@ const debugAABB = (pA, pB, sA, sB, color)=>
 
 const debugInit = ()=>
 {
-    document.body.appendChild(gifCanvas = document.createElement('canvas'));
-    gifCanvas.style = 'display:none';
+    // create link for saving screenshots
+    document.body.appendChild(downloadLink = document.createElement('a'));
+    downloadLink.style.display = 'none';
 }
 
 const debugUpdate = ()=>
@@ -83,32 +85,6 @@ const debugUpdate = ()=>
     if (keyWasPressed(51)) // 3
     {
         godMode = !godMode;
-    }
-    if (keyWasPressed(52) || gifTimer.get() >= maxGifSeconds) // 4
-    {
-        if (!gifProcessing)
-        {
-            if (gif)
-            {
-                gif.on('finished', blob => {download(blob, engineName + '.gif', 'image/gif'), gifProcessing = gif = 0});
-                gif.render();
-                gifProcessing = 1;
-                gifTimer.unset();
-            }
-            else
-            {
-                gif = new GIF({ workerScript: 'engine/debug/gif.worker.js', quality:0 });
-                gifTimer.set();
-            }
-        }
-        /*const canvas = tileLayerCanvasCache[0];
-        if (canvas)
-        {
-            if (debugCanvas == -1)
-                document.body.appendChild(canvas), debugCanvas=0;
-            debugCanvas = !debugCanvas;
-            canvas.style = debugCanvas? 'position:absolute;border:1px solid green' : 'display:none';
-        }*/
     }
         
     if (keyWasPressed(53)) // 5
@@ -144,35 +120,6 @@ const debugRender = ()=>
     {
         debugSaveCanvas(mainCanvas);
         debugTakeScreenshot = 0;
-    }
-
-    if (gif)
-    {
-        mainContext.textAlign = 'center';
-        mainContext.textBaseline = 'middle';
-        mainContext.font = '50px monospace';
-
-        if (gifProcessing)
-        {
-            mainContext.fillStyle = '#ff0';
-            mainContext.fillText('Processing GIF', mainCanvas.width/2, 99);
-        }
-        else
-        {
-            //gifCanvas.style = 'position:absolute;border:1px solid red';
-            const w = gifCanvas.width = gifSize.x |0;
-            const h = gifCanvas.height = gifSize.y |0;
-            const context = gifCanvas.getContext('2d');
-            context.imageSmoothingEnabled = !pixelated;
-            const x = mainCanvas.width/2 - w/2 |0, y = mainCanvas.height/2 - h/2 |0;
-            context.drawImage(mainCanvas, x, y, w, h, 0, 0, w, h)
-            gif.addFrame(gifCanvas, {copy: true, delay: (1e3/FPS|0)});
-
-            mainContext.fillStyle = '#f00';
-            mainContext.fillText('CAPTURING GIF ' + formatTime(gifTimer.get()), mainCanvas.width/2, 99);
-            mainContext.strokeStyle = '#fff3';
-            mainContext.strokeRect(x,y, w, h);
-        }
     }
 
     if (debugOverlay)
@@ -298,8 +245,6 @@ const debugRender = ()=>
             mainContext.fillText('2: Debug Particles', x, y += h);
             mainContext.fillStyle = godMode ? '#f00' : '#fff';
             mainContext.fillText('3: God Mode', x, y += h);
-            mainContext.fillStyle = gif ? '#f00' : '#fff';
-            mainContext.fillText('4: Record GIF', x, y += h);
             mainContext.fillStyle = '#fff';
             mainContext.fillText('5: Save Screenshot', x, y += h);
             //mainContext.fillStyle = debugParticleEditor ? '#f00' : '#fff';

@@ -19,7 +19,7 @@ rem combine code
 mkdir build
 type engine\engineUtil.js >> build\index.js
 echo.>> build\index.js
-type engine\debug\engineBuild.js >> build\index.js
+type engine\build\engineBuild.js >> build\index.js
 echo.>> build\index.js
 type engine\engine.js >> build\index.js
 echo.>> build\index.js
@@ -79,7 +79,8 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 rem build the html
-echo ^<body^>^<script^> >> build\index.html
+type engine\build\index.html >> build\index.html
+echo ^<script^> >> build\index.html
 type build\index.js >> build\index.html
 echo ^</script^> >> build\index.html
 

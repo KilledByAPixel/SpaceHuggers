@@ -10,7 +10,6 @@ const clampCamera = !debug;
 const lowGraphicsSettings = glOverlay = !window['chrome']; // only chromium uses high settings
 const startCameraScale = 4*16;
 const defaultCameraScale = 4*16;
-const precipitationEnable = 1;
 const maxPlayers = 4;
 
 const team_none = 0;
@@ -112,55 +111,52 @@ engineInit(
 ///////////////////////////////////////////////////////////////////////////////
 ()=> // appUpdatePost
 {
-    if (!debug || !gifTimer.isSet())
+    if (players.length == 1)
     {
-        if (players.length == 1)
-        {
-            const player = players[0];
-            if (!player.isDead())
-                cameraPos = cameraPos.lerp(player.pos, clamp(player.getAliveTime()/2));
-        }
-        else
-        {
-            // camera follows average pos of living players
-            let posTotal = vec2();
-            let playerCount = 0;
-            let cameraOffset = 1;
-            for(const player of players)
-            {
-                if (player && !player.isDead())
-                {
-                    ++playerCount;
-                    posTotal = posTotal.add(player.pos.add(vec2(0,cameraOffset)));
-                }
-            }
-
-            if (playerCount)
-                cameraPos = cameraPos.lerp(posTotal.scale(1/playerCount), .2);
-        }
-
-        // spawn players if they don't exist
-        for(let i = maxPlayers;i--;)
-        {
-            if (!players[i] && (gamepadWasPressed(0, i)||gamepadWasPressed(1, i)))
-            {
-                ++playerLives;
-                new Player(checkpointPos, i);
-            }
-        }
-        
-        // clamp to bottom and sides of level
-        if (clampCamera)
-        {
-            const w = mainCanvas.width/2/cameraScale+1;
-            const h = mainCanvas.height/2/cameraScale+2;
-            cameraPos.y = max(cameraPos.y, h);
-            if (w*2 < tileCollisionSize.x)
-                cameraPos.x = clamp(cameraPos.x, tileCollisionSize.x - w, w);
-        }
-
-        updateParallaxLayers();
+        const player = players[0];
+        if (!player.isDead())
+            cameraPos = cameraPos.lerp(player.pos, clamp(player.getAliveTime()/2));
     }
+    else
+    {
+        // camera follows average pos of living players
+        let posTotal = vec2();
+        let playerCount = 0;
+        let cameraOffset = 1;
+        for(const player of players)
+        {
+            if (player && !player.isDead())
+            {
+                ++playerCount;
+                posTotal = posTotal.add(player.pos.add(vec2(0,cameraOffset)));
+            }
+        }
+
+        if (playerCount)
+            cameraPos = cameraPos.lerp(posTotal.scale(1/playerCount), .2);
+    }
+
+    // spawn players if they don't exist
+    for(let i = maxPlayers;i--;)
+    {
+        if (!players[i] && (gamepadWasPressed(0, i)||gamepadWasPressed(1, i)))
+        {
+            ++playerLives;
+            new Player(checkpointPos, i);
+        }
+    }
+    
+    // clamp to bottom and sides of level
+    if (clampCamera)
+    {
+        const w = mainCanvas.width/2/cameraScale+1;
+        const h = mainCanvas.height/2/cameraScale+2;
+        cameraPos.y = max(cameraPos.y, h);
+        if (w*2 < tileCollisionSize.x)
+            cameraPos.x = clamp(cameraPos.x, tileCollisionSize.x - w, w);
+    }
+
+    updateParallaxLayers();
 
     updateSky();
 },
@@ -198,11 +194,11 @@ engineInit(
     {
         //mainContext.fillStyle = (new Color).setHSLA(time/3,1,.5,p).rgba();
         mainContext.font = '1.5in impact';
-        mainContext.fillText('SPACE HUGGERS', mainCanvas.width/2, 140);
+        //mainContext.fillText('SPACE HUGGERS', mainCanvas.width/2, 140);
     }
 
     mainContext.font = '.5in impact';
-    p > 0 && mainContext.fillText('A JS13K Game by Frank Force',mainCanvas.width/2, 210);
+    //p > 0 && mainContext.fillText('A JS13K Game by Frank Force',mainCanvas.width/2, 210);
 
     // check if any enemies left
     let enemiesCount = 0;
@@ -220,7 +216,7 @@ engineInit(
         levelEndTimer.set();
 
     mainContext.fillStyle = new Color(0,0,0).rgba();
-    mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-40);
+   // mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-40);
 
     // fade in level transition
     const fade = levelEndTimer.isSet() ? percent(levelEndTimer.get(), 3, 1) : percent(levelTimer.get(), .5, 2);

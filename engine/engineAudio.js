@@ -78,7 +78,8 @@ function zzfx(
     bitCrush = 0, delay = 0, sustainVolume = 1, decay = 0, tremolo = 0
 )
 {
-    if (!soundEnable) return;
+    // wait for user input to create audio context
+    if (!soundEnable || !hadInput) return;
 
     // init parameters
     let PI2 = PI*2, sign = v => v>0?1:-1,
@@ -149,11 +150,6 @@ function zzfx(
             j = j || 1;                     // reset pitch jump time
         }
     }
-    
-
-
-    // wait for user input to create audio context
-    if (!soundEnable || !hadInput) return;
     
     // create audio context
     if (!audioContext)
