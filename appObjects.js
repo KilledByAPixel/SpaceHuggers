@@ -18,6 +18,8 @@ class GameObject extends EngineObject
         this.damageTimer = new Timer;
         this.burnDelayTimer = new Timer;
         this.burnTimer = new Timer;
+        this.extinguishTimer = new Timer;
+        this.color = new Color;
         this.additiveColor = new Color(0,0,0,0);
     }
 
@@ -75,14 +77,14 @@ class GameObject extends EngineObject
  
     render()
     {
-        drawTile(this.pos, this.size, this.tileIndex, this.tileSize, this.color ? this.color.scale(this.burnColorPercent(),1) : undefined, this.angle, this.mirror, this.additiveColor);
+        drawTile(this.pos, this.size, this.tileIndex, this.tileSize, this.color.scale(this.burnColorPercent(),1), this.angle, this.mirror, this.additiveColor);
     }
     
     burnColorPercent() { return lerp(this.burnTimer.getPercent(), .2, 1); }
 
     burn(instant)
     {
-        if (!this.canBurn)
+        if (!this.canBurn || this.burnTimer.isSet() || this.extinguishTimer.active())
             return;
 
         if (godMode && this.isPlayer)
@@ -97,12 +99,9 @@ class GameObject extends EngineObject
 
         if (instant)
         {
-            if (!this.burnTimer.isSet())
-            {
-                this.burnTimer.set(this.burnTime*rand(1.5, 1));
-                this.fireEmitter = makeFire();
-                this.addChild(this.fireEmitter);
-            }
+            this.burnTimer.set(this.burnTime*rand(1.5, 1));
+            this.fireEmitter = makeFire();
+            this.addChild(this.fireEmitter);
         }
         else
             this.burnDelayTimer.isSet() || this.burnDelayTimer.set(this.burnDelay*rand(1.5, 1));
@@ -114,6 +113,7 @@ class GameObject extends EngineObject
             return;
 
         // stop burning
+        this.extinguishTimer.set(.1);
         this.burnTimer.unset();
         this.burnDelayTimer.unset();
         if (this.fireEmitter)
@@ -296,7 +296,7 @@ class Prop extends GameObject
             makeWater(this.pos);
 
         this.destroy();
-        makeDebris(this.pos, this.color);
+        makeDebris(this.pos, this.color.scale(this.burnColorPercent(),1));
         
         this.explosionSize ? 
             explosion(this.pos, this.explosionSize) :
@@ -327,7 +327,7 @@ class Checkpoint extends GameObject
 
         // check if player is near
         for(const player of players)
-            !player.isDead() && this.pos.distanceSquared(player.pos) < 1 && this.setActive();
+            player && !player.isDead() && this.pos.distanceSquared(player.pos) < 1 && this.setActive();
     }
 
     setActive()
@@ -364,6 +364,7 @@ class Grenade extends GameObject
         this.elasticity = .3;
         this.friction   = .9;
         this.angleDamping = .96;
+        this.renderOrder = 1e8;
         this.setCollision();
     }
 
@@ -384,7 +385,7 @@ class Grenade extends GameObject
             this.beepTimer.set(1);
         }
 
-        alertEnemies(this.pos, this.pos, 2);
+        alertEnemies(this.pos, this.pos);
     }
        
     render()
@@ -436,13 +437,12 @@ class Weapon extends EngineObject
 
         const fireRate = 8;
         const bulletSpeed = .5;
-        const bulletRange = 8;
         const spread = .1;
 
         this.mirror = this.parent.mirror;
         this.fireTimeBuffer += timeDelta;
 
-        if (this.recoilTimer.isSet())
+        if (this.recoilTimer.active())
             this.localAngle = lerp(this.recoilTimer.getPercent(), 0, this.localAngle);
 
         if (this.triggerIsDown)
@@ -457,7 +457,6 @@ class Weapon extends EngineObject
                 const bullet = new Bullet(this.pos, this.parent);
                 const direction = vec2(this.getMirrorSign(speed), 0);
                 bullet.velocity = direction.rotate(rand(spread,-spread));
-                bullet.range = bulletRange;
 
                 this.shellEmitter.localAngle = -.8*this.getMirrorSign();
                 this.shellEmitter.emitParticle();
@@ -471,7 +470,7 @@ class Weapon extends EngineObject
                 playSound(sound_shoot, this.pos);
 
                 // alert enemies
-                this.parent.isPlayer && alertEnemies(this.pos, this.pos, 4);
+                this.parent.isPlayer && alertEnemies(this.pos, this.pos);
             }
         }
         else
@@ -494,6 +493,8 @@ class Bullet extends EngineObject
         this.gravityScale = 0;
         this.attacker = attacker;
         this.team = attacker.team;
+        this.renderOrder = 1e9;
+        this.range = 8;
     }
 
     update()
@@ -563,7 +564,7 @@ class Bullet extends EngineObject
             return;
 
         const emitter = new ParticleEmitter(
-            this.pos, 0, .1, 100, .2, // pos, emitSize, emitTime, emitRate, emiteCone
+            this.pos, 0, .1, 100, .5, // pos, emitSize, emitTime, emitRate, emiteCone
             undefined, undefined,     // tileIndex, tileSize
             new Color(1,1,0), new Color(1,0,0), // colorStartA, colorStartB
             new Color(1,1,0), new Color(1,0,0), // colorEndA, colorEndB
@@ -573,6 +574,7 @@ class Bullet extends EngineObject
         );
         emitter.trailScale = 1;
         emitter.angle = this.lastVelocity.angle() + PI;
+        emitter.elasticity = .3;
 
         //playSound(sound_bulletHit, this.pos);
         this.destroy();

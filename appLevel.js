@@ -42,26 +42,22 @@ const resetGame=()=>
 {
     levelEndTimer.unset();
     gameTimer.set(totalKills = level = 0);
-    nextLevel(playerLives = 10);
+    nextLevel(playerLives = 6);
 }
 
 function buildTerrain(size)
 {
-    let startGroundLevel = rand(40, 60);
-    let groundLevel = startGroundLevel;
-
-    let groundSlope = rand(.5,-.5);
-    let canayonWidth = 0;
-
     tileBackground = [];
     initTileCollision(size);
-    let backgroundDelta = 0, backgroundDeltaSlope = 0;
+    let startGroundLevel = rand(40, 60);
+    let groundLevel = startGroundLevel;
+    let groundSlope = rand(.5,-.5);
+    let canayonWidth = 0, backgroundDelta = 0, backgroundDeltaSlope = 0;
     for(let x=0; x < size.x; x++)
     {
         // pull slope towards start ground level
-        groundLevel += groundSlope += (startGroundLevel - groundLevel)/1e3;
-        if (rand() < .05)
-            groundSlope = rand(.5,-.5);
+        groundLevel += groundSlope = rand() < .05 ? rand(.5,-.5) :
+            groundSlope + (startGroundLevel - groundLevel)/1e3;
         
         // small jump
         if (rand() < .04)
@@ -293,6 +289,10 @@ function buildBase()
 function generateLevel()
 {
     levelEndTimer.unset();
+
+    // remove all objects that are not persistnt or are descendants of something persitant
+    for(const o of engineObjects)
+        o.destroy();
     engineObjects = [];
     engineCollideObjects = [];
 
@@ -337,16 +337,6 @@ function generateLevel()
             new Checkpoint(pos);
         }
     }
-
-    // destroy any objects that are stuck in collision
-    forEachObject(0, 0, (o)=>
-    {
-        if (o.isGameObject)
-        {
-            const checkBackground = o.isCheckpoint;
-            (checkBackground ? getTileBackgroundData(o.pos) : getTileCollisionData(o.pos)) > 0 && o.destroy();
-        }
-    });
 }
 
 const groundTileStart = 8;
@@ -395,8 +385,7 @@ function makeTileLayers(level_)
             else if (tileType == tileType_ladder)
             {
                 tileIndex = groundTileStart+7;
-                direction = 0;
-                mirror = 0;
+                direction = mirror = 0;
             }
             tileLayer.setData(pos, new TileLayerData(tileIndex, direction, mirror, color));
         }
@@ -462,10 +451,9 @@ function applyArtToLevel()
     if (precipitationEnable && !lowGraphicsSettings)
     {
         // create rain or snow particles
-        if (rand() < .5)
+        if (skyRain = rand() < .5)
         {
             // rain
-            skyRain = 1;
             skyParticles = new ParticleEmitter(
                 vec2(), 3, 0, 0, .3, // pos, emitSize, emitTime, emitRate, emiteCone
                 0, undefined,   // tileIndex, tileSize
@@ -481,7 +469,6 @@ function applyArtToLevel()
         else
         {
             // snow
-            skyRain = 0;
             skyParticles = new ParticleEmitter(
                 vec2(), 3, 0, 0, .5, // pos, emitSize, emitTime, emitRate, emiteCone
                 0, undefined,   // tileIndex, tileSize
@@ -499,9 +486,9 @@ function applyArtToLevel()
 
 function nextLevel()
 {
+    playerLives += 4; // three for beating a level plus 1 for respawning
     levelEnemyCount = 15 + min(level * 30, 300);
     ++level;
-    gravity = -.01;
     levelSeed = randSeed = rand(1e9)|0;
     levelSize = vec2(min(level*99,400),200);
     levelColor = randColor(new Color(.2,.2,.2), new Color(.8,.8,.8));
@@ -516,7 +503,7 @@ function nextLevel()
     levelWarmup = 1;
 
     // objects that effect the level must be added here
-    new Checkpoint(checkpointPos).setActive();
+    const firstCheckpoint = new Checkpoint(checkpointPos).setActive();
 
     applyArtToLevel();
 
@@ -527,6 +514,16 @@ function nextLevel()
         engineUpdateObjects();
     }
     levelWarmup = 0;
+
+    // destroy any objects that are stuck in collision
+    forEachObject(0, 0, (o)=>
+    {
+        if (o.isGameObject && o != firstCheckpoint)
+        {
+            const checkBackground = o.isCheckpoint;
+            (checkBackground ? getTileBackgroundData(o.pos) > 0 : tileCollisionTest(o.pos,o.size))  && o.destroy();
+        }
+    });
 
     // hack, subtract off warm up time from main game timer
     //gameTimer.time += warmUpTime;

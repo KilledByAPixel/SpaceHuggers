@@ -58,7 +58,7 @@ function makeFire(pos = vec2())
         new Color(1,0,0), new Color(1,.5,.1), // colorEndA, colorEndB
         .5, .5, .1, .01, .1, // particleTime, sizeStart, sizeEnd, particleSpeed, particleAngleSpeed
         .95, .1, -.05, PI, .5,  // damping, angleDamping, gravityScale, particleCone, fadeRate, 
-        .5, 0, 1, 0, 1e9);             // randomness, collide, additive, randomColorLinear, renderOrder
+        .5, 0, 1);             // randomness, collide, additive, randomColorLinear, renderOrder
 }
 
 function makeDebris(pos, color = new Color, amount = 100)
@@ -94,14 +94,15 @@ function makeWater(pos, amount=400)
     // droplets
     const emitter = new ParticleEmitter(
         pos, 1, .1, amount, PI, // pos, emitSize, emitTime, emitRate, emiteCone
-        undefined, undefined,   // tileIndex, tileSize
-        new Color(1,1,1), new Color(.3,.6,1,.5), // colorStartA, colorStartB
-        new Color(1,1,1), new Color(.3,.6,1,.5), // colorEndA, colorEndB
-        1, .1, .1, .1, .1, // particleTime, sizeStart, sizeEnd, particleSpeed, particleAngleSpeed
-        1, .95, .7, PI, .1,  // damping, angleDamping, gravityScale, particleCone, fadeRate, 
+        0, undefined,   // tileIndex, tileSize
+        new Color(.8,1,1,.6), new Color(.5,.5,1,.2), // colorStartA, colorStartB
+        new Color(.8,1,1,.6), new Color(.5,.5,1,.2), // colorEndA, colorEndB
+        2, .1, .1, .2, 0,  // particleTime, sizeStart, sizeEnd, particleSpeed, particleAngleSpeed
+        .99, 1, .5, PI, .2,  // damping, angleDamping, gravityScale, particleCone, fadeRate, 
         .5, 1              // randomness, collide, additive, randomColorLinear, renderOrder
     );
-    emitter.trailScale = 3;
+    emitter.elasticity = .2;
+    emitter.trailScale = 2;
 
     // put out fires
     const radius = 3;
@@ -128,7 +129,8 @@ function makeWater(pos, amount=400)
 
 function explosion(pos, radius=2)
 {
-    if (radius <=0 || levelWarmup)
+    ASSERT(radius > 0);
+    if (levelWarmup)
         return;
 
     const damage = radius*2;
@@ -280,7 +282,6 @@ function decorateTile(pos)
             continue;
 
         // hacky code to make pixel perfect outlines
-        const directionVector = vec2().setAngle(i*PI/2, 8).int();
         let size = tileData == tileType_dirt ? vec2( rand(16,8), 2) : vec2( 16, 1);
         i&1 && (size = size.flip());
 
@@ -315,8 +316,7 @@ function destroyTile(pos, makeSound = 1, cleanNeighbors = 1, maxCascadeChance = 
     const layerData = tileLayer.getData(pos);
     if (layerData)
     {
-        const color = layerData.color;
-        makeDebris(centerPos, color.mutate());
+        makeDebris(centerPos, layerData.color.mutate());
         makeSound && playSound(sound_destroyTile, centerPos);
 
         setTileCollisionData(pos, tileType_empty);
@@ -352,7 +352,7 @@ function destroyTile(pos, makeSound = 1, cleanNeighbors = 1, maxCascadeChance = 
 function drawStars()
 {
     randSeed = levelSeed;
-    for(let i = lowGraphicsSettings ? 300 : 1e3; i--;)
+    for(let i = lowGraphicsSettings ? 400 : 1e3; i--;)
     {
         let size = randSeeded(6, 1);
         let speed = randSeeded() < .9 ? randSeeded(5) : randSeeded(99,9);
@@ -405,7 +405,7 @@ function updateSky()
         skyParticles.angle = clamp(skyParticles.angle + rand(.3,-.3),PI+.5,PI-.5);
     }
    
-    if (!skySoundTimer.active())
+    if (!levelWarmup && !skySoundTimer.active())
     {
         skySoundTimer.set(rand(2,1));
         playSound(skyRain ? sound_rain : sound_wind, skyParticlesPos, 20, skyParticles.emitRate/1e3);
@@ -428,10 +428,9 @@ function generateParallaxLayers()
         let groundLevel = startGroundLevel, groundSlope = rand(1,-1);
         tileParallaxLayer.renderOrder = -3e3+i;
         tileParallaxLayer.canvas.width = parallaxSize.x;
-        tileParallaxLayer.canvas.height = parallaxSize.y;
 
         const layerColor = levelColor.mutate(.2).lerp(levelSkyColor,.95-i*.15);
-        const gradient = tileParallaxLayer.context.fillStyle = tileParallaxLayer.context.createLinearGradient(0,0,0,tileParallaxLayer.canvas.height);
+        const gradient = tileParallaxLayer.context.fillStyle = tileParallaxLayer.context.createLinearGradient(0,0,0,tileParallaxLayer.canvas.height = parallaxSize.y);
         gradient.addColorStop(0,layerColor.rgba());
         gradient.addColorStop(1,layerColor.subtract(new Color(1,1,1,0)).mutate(.1).clamp().rgba());
         //tileParallaxLayer.context.fillStyle = layerColor.rgba();
@@ -439,10 +438,8 @@ function generateParallaxLayers()
         for(let x=parallaxSize.x;x--;)
         {
             // pull slope towards start ground level
-            groundLevel += groundSlope += (startGroundLevel - groundLevel)/2e3;
-            if (rand() < .05)
-                groundSlope = rand(1,-1);
-            tileParallaxLayer.context.fillRect(x,groundLevel,1,parallaxSize.y)
+            tileParallaxLayer.context.fillRect(x,groundLevel += groundSlope = rand() < .05 ? rand(1,-1) :
+                groundSlope + (startGroundLevel - groundLevel)/2e3,1,parallaxSize.y)
         }
     }
 }

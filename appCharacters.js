@@ -7,8 +7,8 @@
 'use strict';
 
 const aiEnable = 1;
-const maxCharacterSpeed = .2;
 const debugAI = 0;
+const maxCharacterSpeed = .2;
 
 class Character extends GameObject 
 {
@@ -40,6 +40,7 @@ class Character extends GameObject
     
     update() 
     {
+        this.lastPos = this.pos.copy();
         this.gravityScale = 1; // reset default gravity (incase climbing ladder)
 
         if (this.isDead() || !this.inUpdateWindow() && !this.persistent)
@@ -70,6 +71,25 @@ class Character extends GameObject
             
         // update ladder
         //    debugPoint(vec2((this.pos.x|0)+.5, this.pos.y));
+
+        if (this.dodgeTimer.active())
+        {
+            // update roll
+            this.angle = this.getMirrorSign(2*PI*this.dodgeTimer.getPercent());
+
+            if (this.groundObject)
+                this.velocity.x += this.getMirrorSign(.1);
+
+            // apply damage to enemies when rolling
+            forEachObject(this.pos, this.size, (o)=>
+            {
+                if (o.isCharacter && o.team != this.team && !o.isDead())
+                    o.damage(1, this);
+            });
+        }
+        else
+            this.angle = 0;
+
         if (this.climbingLadder)
         {
             this.gravityScale = this.climbingWall = this.groundObject = 0;
@@ -78,8 +98,11 @@ class Character extends GameObject
             this.velocity = this.velocity.multiply(vec2(.85)).add(vec2(0,.02*moveInput.y));
 
             const delta = (this.pos.x|0)+.5 - this.pos.x;
-            this.velocity.x += .02*delta*abs(moveInput.y);
+            this.velocity.x += .02*delta*abs(moveInput.x ? 0:moveInput.y);
             moveInput.x *= .2;
+
+            // exit ladder if ground is below
+            this.climbingLadder = moveInput.y >= 0 || getTileCollisionData(this.pos.subtract(vec2(0,1))) <= 0;
         }
         else
         {
@@ -142,32 +165,11 @@ class Character extends GameObject
 
             if (!this.groundObject && this.getAliveTime() > .2)
                 this.velocity.y += .2;
-
         }
-        if (this.dodgeTimer.active())
-        {
-            // update roll
-            this.angle = this.getMirrorSign(2*PI*this.dodgeTimer.getPercent());
-
-                if (this.groundObject)
-                    this.velocity.x += this.getMirrorSign(.1);
-
-                // apply damage to enemies when rolling
-                forEachObject(this.pos, this.size, (o)=>
-                {
-                    if (o.isCharacter && o.team != this.team && !o.isDead())
-                        o.damage(1, this);
-                });
-        }
-        else
-            this.angle = 0;
 
         // apply movement acceleration and clamp
         this.velocity.x = clamp(this.velocity.x + moveInput.x * .042, maxCharacterSpeed, -maxCharacterSpeed);
 
-        // save old pos for walk cycle speed
-        const oldPosX = this.pos.x;
-        
         // call parent, update physics
         const oldVelocity = this.velocity.copy();
         super.update();
@@ -187,11 +189,9 @@ class Character extends GameObject
         else
             this.walkCyclePercent = 0;
 
+        this.weapon.triggerIsDown = this.holdingShoot && !this.dodgeTimer.active();
         if (!this.dodgeTimer.active())
         {
-            if (this.weapon)
-                this.weapon.triggerIsDown = this.holdingShoot;
-
             if (this.grenadeCount > 0 && this.pressingThrow && !this.wasPressingThrow && !this.grendeThrowTimer.active())
             {
                 // throw greande
@@ -298,22 +298,30 @@ class Character extends GameObject
         this.weapon && this.weapon.destroy();
 
         // move to back layer
-        this.renderOrder -= 2;
+        this.renderOrder = 1;
     }
     
     collideWithTile(data, pos)
     {
         if (!data)
-            return 0;
+            return;
 
         if (data == tileType_ladder)
         {
-            //debugPoint(pos, '#0ff')
-            //debugPoint(vec2(pos.x,this.pos.y - this.size.y*.5), '#f0f')
-            if (getTileCollisionData(pos.add(vec2(0,1))) == tileType_ladder)
-                return 0;
+            if (pos.y + 1 > this.lastPos.y - this.size.y*.5)
+                return;
 
-            return !this.climbingLadder && pos.y < this.pos.y - this.size.y*.5;
+            if (getTileCollisionData(pos.add(vec2(0,1))) // above
+                && !(getTileCollisionData(pos.add(vec2(1,0))) // left
+                    && getTileCollisionData(pos.add(vec2(1,0)))) // right
+            )
+                return; // dont collide if something above it and nothing to left or right
+
+            //debugPoint(this.pos.add(vec2(0,-this.size.y*.5)), '#f00');
+            //debugPoint(pos.add(vec2(0,1)), '#0ff');
+
+            // allow standing on top of ladders
+            return !this.climbingLadder;
         }
 
         // break blocks above
@@ -323,7 +331,7 @@ class Character extends GameObject
             if (destroyTile(pos))
             {
                 this.velocity.y = 0;
-                return 0;
+                return;
             }
         }
 
@@ -366,8 +374,9 @@ const type_elite  = 3;
 const type_grenade= 4;
 const type_count  = 5;
 
-function alertEnemies(pos, playerPos, radius=2)
+function alertEnemies(pos, playerPos)
 {
+    const radius = 4;
     forEachObject(pos, radius, (o)=>{o.team == team_enemy && o.alert && o.alert(playerPos)});
     debugAI && debugCircle(pos, radius, '#0ff6');
 }
@@ -389,16 +398,15 @@ class Enemy extends Character
         this.type = randSeeded()**3*min(level+1,type_count)|0;
 
         let health = 1 + this.type;
+        this.eyeColor = new Color(1,.5,0);
         if (this.type == type_weak)
         {
             this.color = new Color(0,1,0);
-            this.eyeColor = new Color(1,.5,0);
             this.size = this.size.scale(this.sizeScale = .9);
         }
         else if (this.type == type_normal)
         {
             this.color = new Color(0,.4,1);
-            this.eyeColor = new Color(1,.5,0);
         }
         else if (this.type == type_strong)
         {
@@ -431,10 +439,10 @@ class Enemy extends Character
 
         this.health = this.healthMax = health;
         this.color = this.color.mutate();
+        this.mirror = rand() < .5;
 
         new Weapon(this.pos, this);
          --levelEnemyCount;
-
 
         this.sightCheckFrame = rand(9)|0;
     }
@@ -463,7 +471,7 @@ class Enemy extends Character
             for(const player of players)
             {
                 // check range
-                if (!player.isDead())
+                if (player && !player.isDead())
                 if (sawRecently || this.getMirrorSign() == sign(player.pos.x - this.pos.x))
                 if (sawRecently || abs(player.pos.x - this.pos.x) > abs(player.pos.y - this.pos.y) ) // 45 degree slope
                 if (this.pos.distanceSquared(player.pos) < visionRangeSquared)
@@ -507,8 +515,8 @@ class Enemy extends Character
             this.moveInput.y = 0;
 
             // random dodge
-            if (this.type >= type_elite)
-                this.pressedDodge = rand() < .02;
+            if (this.type == type_elite)
+                this.pressedDodge = 1;
             else if (this.groundObject)
                 this.pressedDodge = rand() < .005;
         }
@@ -547,7 +555,7 @@ class Enemy extends Character
                         this.facePlayerTimer.set(rand(2,.5));
 
                     // random jump
-                    if (rand()<(this.type != type_elite ? .0005 : .005))
+                    if (rand()<(this.type < type_strong ? .0005 : .005))
                     {
                         this.pressedJumpTimer.set(.1);
                         this.holdJumpTimer.set(rand(.2));
@@ -626,7 +634,7 @@ class Enemy extends Character
         super.update();
 
         // override default mirror
-        if (this.facePlayerTimer.active() && !this.dodgeTimer.active())
+        if (this.facePlayerTimer.active() && !this.dodgeTimer.active() && !this.reactionTimer.active())
             this.mirror = this.sawPlayerPos.x < this.pos.x;
     }
 
@@ -649,11 +657,13 @@ class Enemy extends Character
 
     damage(damage, damagingObject)
     {
-        if (!this.isDead())
-            this.alert(damagingObject ? damagingObject.pos : this.pos, 1);
-        
-        this.reactionTimer.set(rand(1,.5));
         super.damage(damage, damagingObject);
+        if (!this.isDead())
+        {
+            this.alert(damagingObject ? damagingObject.pos.subtract(damagingObject.velocity.normalize()) : this.pos, 1);
+            this.reactionTimer.set(rand(1,.5));
+            this.shootTimer.unset();
+        }
     }
 
     kill(damagingObject)
@@ -663,20 +673,6 @@ class Enemy extends Character
 
         super.kill(damagingObject);
         levelWarmup || ++totalKills;
-
-        // check if any enemies left
-        let enemiesCount = 0;
-        for (const o of engineCollideObjects)
-        {
-            if (o.isCharacter && o.team  == team_enemy && !o.isDead())
-                ++enemiesCount;
-        }
-
-        if (!enemiesCount)
-        {
-            playerLives += 3;
-            levelEndTimer.set();
-        }
     }
 }
 
@@ -689,6 +685,7 @@ class Player extends Character
         super(pos);
 
         this.grenadeCount = 3;
+        this.burnTime = 2;
         
         this.eyeColor = (new Color).setHSLA(-playerIndex*.6,1,.5);
         //this.color = this.color.mutate(.2);
@@ -728,7 +725,7 @@ class Player extends Character
                     {
                         this.persistent = 0;
                         new Player(checkpointPos, this.playerIndex);
-                        playSound(sound_jump, checkpointPos);
+                        playSound(sound_jump, cameraPos);
                     }
                 }
                 else
@@ -738,8 +735,11 @@ class Player extends Character
                     let minDeadTime = 1e3;
                     for(const player of players)
                     {
-                        minDeadTime = min(minDeadTime, player.isDead() ? player.deadTimer.get() : 1e3);
-                        hasLivingPlayers |= (!player.isDead() && player.getAliveTime() > .1);
+                        if (player)
+                        {
+                            minDeadTime = min(minDeadTime, player.isDead() ? player.deadTimer.get() : 1e3);
+                            hasLivingPlayers |= (!player.isDead() && player.getAliveTime() > .1);
+                        }
                     }
 
                     if (minDeadTime > 2)
@@ -748,15 +748,15 @@ class Player extends Character
                         {
                             // respawn all
                             this.persistent = 0;
-                            new Player(checkpointPos.subtract(vec2(this.playerIndex*.4,0)), this.playerIndex);
-                            playSound(sound_jump, checkpointPos);
+                            new Player(checkpointPos.add(vec2(1-this.playerIndex/2,0)), this.playerIndex);
+                            this.playerIndex || playSound(sound_jump, cameraPos);
                         }
                         else if (checkpointTimer.active())
                         {
                             // respawn if checkpoint active
                             this.persistent = 0;
                             const player = new Player(checkpointPos, this.playerIndex);
-                            playSound(sound_jump, checkpointPos);
+                            playSound(sound_jump, cameraPos);
                         }
                     }
                 }
@@ -783,7 +783,7 @@ class Player extends Character
         this.holdingJump = (!this.playerIndex && keyIsDown(38)) || gamepadIsDown(0, this.playerIndex);
         if (!this.holdingJump)
             this.pressedJumpTimer.unset();
-        else if (!this.wasHoldingJump)
+        else if (!this.wasHoldingJump || this.climbingWall)
             this.pressedJumpTimer.set(.3);
         this.wasHoldingJump = this.holdingJump;
 
@@ -791,10 +791,6 @@ class Player extends Character
         this.holdingShoot  = !this.playerIndex && (mouseIsDown(0) || keyIsDown(90)) || gamepadIsDown(2, this.playerIndex);
         this.pressingThrow = !this.playerIndex && (mouseIsDown(2) || keyIsDown(67)) || gamepadIsDown(1, this.playerIndex);
         this.pressedDodge  = !this.playerIndex && (mouseIsDown(1) || keyIsDown(88)) || gamepadIsDown(3, this.playerIndex);
-
-        // jump when spawn in
-        if (players.length > 1 && this.getAliveTime() < .1)
-             this.pressedDodge = 1;
 
         super.update();
 
@@ -820,10 +816,11 @@ class Player extends Character
                 if (tileCollisionRaycast(this.pos,vec2(this.pos.x,0)))
                 {
                     for(const player of players)
-                        if (player != this && !player.isDead())
+                        if (player && player != this && !player.isDead())
                         {
                             this.pos = player.pos.copy();
                             this.velocity = vec2();
+                            playSound(sound_jump, this.pos);
                         }
                 }
                 else

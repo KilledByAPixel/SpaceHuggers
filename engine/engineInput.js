@@ -54,7 +54,8 @@ onmousemove = e=>
     mousePosScreen.x = mainCanvasSize.x * percent(e.x, rect.right, rect.left);
     mousePosScreen.y = mainCanvasSize.y * percent(e.y, rect.bottom, rect.top);
 }
-onwheel = e=> e.ctrlKey || (mouseWheel = sign(e.deltaY));
+if(debug)
+    onwheel = e=> e.ctrlKey || (mouseWheel = sign(e.deltaY));
 oncontextmenu = e=> !1; // prevent right click menu
 const remapKeyCode = c=> copyWASDToDpad ? c==87?38 : c==83?40 : c==65?37 : c==68?39 : c : c;
 
@@ -89,7 +90,7 @@ function updateGamepads()
             data.stickData = [vec2(), vec2()];
         }
 
-        if (gamepad && gamepad.axes.length >= 4)
+        if (gamepad && gamepad.axes.length >= 2)
         {
             gamepadCount = i+1;
 
@@ -99,7 +100,6 @@ function updateGamepads()
                 v >  deadZone ?  percent( v, deadZoneMax, deadZone) : 
                 v < -deadZone ? -percent(-v, deadZoneMax, deadZone) : 0;
             data.stickData[0] = vec2(applyDeadZone(gamepad.axes[0]), applyDeadZone(-gamepad.axes[1]));
-            data.stickData[1] = vec2(applyDeadZone(gamepad.axes[2]), applyDeadZone(-gamepad.axes[3]));
             
             if (copyGamepadDirectionToStick)
             {
@@ -110,7 +110,6 @@ function updateGamepads()
 
             // clamp stick input to unit vector
             data.stickData[0] = data.stickData[0].clampLength();
-            data.stickData[1] = data.stickData[1].clampLength();
             
             // read buttons
             gamepad.buttons.map((button, j)=>

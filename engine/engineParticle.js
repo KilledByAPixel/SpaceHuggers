@@ -36,8 +36,7 @@ class ParticleEmitter extends EngineObject
         collideTiles,                   // do particles collide against tiles
         additive,                       // should particles use addtive blend
         randomColorLinear = 1,          // should color be randomized linearly or across each component
-        renderOrder = additive ? 1 : 0, // render order for particles (additive is above other stuff by default)
-        trailScale = 0                  // extend particles as a trail along velocity direction
+        renderOrder = additive ? 1e9 : 0// render order for particles (additive is above other stuff by default)
     )
     {
         super(pos, new Vector2, tileIndex, tileSize);
@@ -70,10 +69,8 @@ class ParticleEmitter extends EngineObject
         this.collideTiles      = collideTiles;
         this.additive          = additive;
         this.renderOrder       = renderOrder;
-        this.trailScale        = trailScale;
-
-        // prepare to emit particles
-        this.emitTimeBuffer = 0;
+        this.trailScale        =  
+        this.emitTimeBuffer    = 0;
     }
     
     update()
@@ -129,7 +126,7 @@ class ParticleEmitter extends EngineObject
         particle.lifeTime        = particleTime;
         particle.sizeStart       = sizeStart;
         particle.sizeEndDelta    = sizeEnd - sizeStart;
-        particle.mirror          = rand(2)|0; // random mirroring
+        //particle.mirror          = rand(2)|0; // random mirroring
         particle.fadeRate        = this.fadeRate;
         particle.damping         = this.damping;
         particle.angleDamping    = this.angleDamping;

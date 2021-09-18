@@ -93,17 +93,16 @@ engineInit(
             randomizeLevelParams();
             applyArtToLevel();
         }*/
-
-        if (keyWasPressed(82))
-            resetGame();
+        if (keyWasPressed(78))
+            nextLevel();
     }
 
     // restart if no lives left
     let minDeadTime = 1e3;
     for(const player of players)
-        minDeadTime = min(minDeadTime, player.isDead() ? player.deadTimer.get() : 0);
+        minDeadTime = min(minDeadTime, player && player.isDead() ? player.deadTimer.get() : 0);
 
-    if (minDeadTime > 9)
+    if (minDeadTime > 3 && (keyWasPressed(90) || keyWasPressed(32) || gamepadWasPressed(0)) || keyWasPressed(82))
         resetGame();
 
     if (levelEndTimer.get() > 3)
@@ -129,7 +128,7 @@ engineInit(
             let cameraOffset = 1;
             for(const player of players)
             {
-                if (!player.isDead())
+                if (player && !player.isDead())
                 {
                     ++playerCount;
                     posTotal = posTotal.add(player.pos.add(vec2(0,cameraOffset)));
@@ -153,8 +152,8 @@ engineInit(
         // clamp to bottom and sides of level
         if (clampCamera)
         {
-            const w = maxWidth/2/cameraScale+1;
-            const h = maxHeight/2/cameraScale+2;
+            const w = mainCanvas.width/2/cameraScale+1;
+            const h = mainCanvas.height/2/cameraScale+2;
             cameraPos.y = max(cameraPos.y, h);
             if (w*2 < tileCollisionSize.x)
                 cameraPos.x = clamp(cameraPos.x, tileCollisionSize.x - w, w);
@@ -209,14 +208,16 @@ engineInit(
     let enemiesCount = 0;
     for (const o of engineCollideObjects)
     {
-        if (o.isCharacter && o.team  == team_enemy && !o.isDead())
+        if (o.isCharacter && o.team  == team_enemy)
         {
             ++enemiesCount;
-
             const pos = vec2(mainCanvas.width/2 + (o.pos.x - cameraPos.x)*30,mainCanvas.height-20);
             drawRectScreenSpace(pos, o.size.scale(20), o.color.scale(1,.6));
         }
     }
+
+    if (!enemiesCount && !levelEndTimer.isSet())
+        levelEndTimer.set();
 
     mainContext.fillStyle = new Color(0,0,0).rgba();
     mainContext.fillText('Level ' + level + '      Lives ' + playerLives + '      Enemies ' + enemiesCount, mainCanvas.width/2, mainCanvas.height-40);

@@ -36,7 +36,6 @@ const getTileCollisionData = (pos)=>
 function tileCollisionTest(pos, size=vec2(), object)
 {
     // check if there is collision in a given area
-    // fixes problem with positions between -1 going to 0
     const minX = pos.x - size.x*.5|0;
     const minY = pos.y - size.y*.5|0;
     const maxX = pos.x + size.x*.5|0;
@@ -45,8 +44,8 @@ function tileCollisionTest(pos, size=vec2(), object)
     for(let x = minX; x <= maxX; ++x)
     {
         const tileData = tileCollision[y*tileCollisionSize.x + x];
-        if (tileData && (object ? object.collideWithTile(tileData, new Vector2(x, y)) : tileData > 0))
-            return new Vector2(x, y);
+        if (tileData && (!object || object.collideWithTile(tileData, new Vector2(x, y))))
+            return 1;
     }
 }
 

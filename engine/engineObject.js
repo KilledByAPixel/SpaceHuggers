@@ -190,14 +190,12 @@ class EngineObject
                         this.groundObject = wasMovingDown;
 
                         // push out of collision and bounce
-                        const dy = sign(this.velocity.y);
                         this.pos.y = oldPos.y;
                         this.velocity.y *= -this.elasticity;
                     }
                     if (isBlockedX || !isBlockedY)
                     {
                         // push out of collision and bounce
-                        const dx = sign(this.velocity.x);
                         this.pos.x = oldPos.x;
                         this.velocity.x *= -this.elasticity;
                     }
