@@ -84,5 +84,3 @@ Good luck, have fun, and give space a hug for me.
 - [Imagemin](https://github.com/imagemin/imagemin)
 - [Efficient Compression Tool](https://github.com/fhanau/Efficient-Compression-Tool)
 - [ZzFX](https://github.com/KilledByAPixel/ZzFX)
-- [DownloadJS](http://danml.com/download.html)
-- [Gif.js](https://github.com/jnordberg/gif.js)
