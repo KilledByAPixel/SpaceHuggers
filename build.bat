@@ -8,8 +8,8 @@ rem npm install -g google-closure-compiler
 rem npm install -g terser
 rem npm install -g uglify
 rem npm install -g roadroller
-rem npm install -g advzip-bin
 rem npm install --global imagemin-cli
+rem npm install -g advzip-bin
 
 rem remove old files
 del %name%.zip index.min.html
@@ -93,8 +93,8 @@ if %ERRORLEVEL% NEQ 0 (
 
 rem zip the result
 cd build
-rem call advzip -a -4 -i 99 ..\%name%.zip index.html
-call ..\ect -9 -strip -zip ..\%name%.zip index.html
+call advzip -a -4 -i 99 ..\%name%.zip index.html
+rem call ..\ect -9 -strip -zip ..\%name%.zip index.html
 if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b %errorlevel%
