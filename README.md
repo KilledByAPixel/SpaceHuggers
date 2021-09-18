@@ -83,6 +83,7 @@ Good luck, have fun, and give space a hug for me.
 - [UglifyJS](https://github.com/mishoo/UglifyJS)
 - [Imagemin](https://github.com/imagemin/imagemin)
 - [Efficient Compression Tool](https://github.com/fhanau/Efficient-Compression-Tool)
+- [Advzip](https://www.npmjs.com/package/advzip-bin)
 - [ZzFX](https://github.com/KilledByAPixel/ZzFX)
 
 # How to build the 13k Zip
