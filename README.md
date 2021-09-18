@@ -68,7 +68,7 @@ Good luck, have fun, and give space a hug for me.
 - Demolitions Expert (Purple) - Throws grenades and can't catch fire, takes 5 hits
 - Small chance of a heavy weapons variation that has double health and fires full auto
 
-# Props
+# Object Types
 - Plastic Crate (Brown) - Burns easily and breaks when fully burnt
 - Metal Crate & Barrel (Gray) - Is hard to destroy, can't burn
 - Water Barrel (Blue) - Puts out fires and pushes away objects
