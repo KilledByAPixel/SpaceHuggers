@@ -91,4 +91,5 @@ Good luck, have fun, and give space a hug for me.
 - Run engine\build\setupBuild.bat to install the necessary tools via npm
 - You will need: google-closure-compiler, uglify, roadroller, imagemin-cli, and advzip
 - Run engine\build\build.bat, to build app.zip which is the final result
+- It will also create a file called index.min.html you can use for testing
 - The zip size may vary by 20 bytes or so due to randomness of roadroller
