@@ -342,14 +342,19 @@ const groundTileStart = 8;
 
 function makeTileLayers(level_)
 {
-    // apply tile art to level
+    // create foreground layer
     tileLayer = new TileLayer(vec2(), levelSize);
     tileLayer.renderOrder = tileRenderOrder;
+
+    // create background layer
+    tileBackgroundLayer = new TileLayer(vec2(), levelSize);
+    tileBackgroundLayer.renderOrder = tileBackgroundRenderOrder;
+
     for(let x=levelSize.x;x--;)
     for(let y=levelSize.y;y--;)
     {
         const pos = vec2(x,y);
-        const tileType = getTileCollisionData(pos);
+        let tileType = getTileCollisionData(pos);
         if (tileType)
         {
             // todo pick tile, direction etc based on neighbors tile type
@@ -388,17 +393,8 @@ function makeTileLayers(level_)
             }
             tileLayer.setData(pos, new TileLayerData(tileIndex, direction, mirror, color));
         }
-    }
-    tileLayer.redraw();
-
-    // create background layer
-    tileBackgroundLayer = new TileLayer(vec2(), levelSize);
-    tileBackgroundLayer.renderOrder = tileBackgroundRenderOrder;
-    for(let x=levelSize.x;x--;)
-    for(let y=levelSize.y;y--;)
-    {
-        const pos = vec2(x,y);
-        const tileType = getTileBackgroundData(pos);
+        
+        tileType = getTileBackgroundData(pos);
         if (tileType)
         {
             // todo pick tile, direction etc based on neighbors tile type
@@ -430,6 +426,7 @@ function makeTileLayers(level_)
             tileBackgroundLayer.setData(pos, new TileLayerData(tileIndex, direction, mirror, color.scale(.4,1)));
         }
     }
+    tileLayer.redraw();
     tileBackgroundLayer.redraw();
 }
 
