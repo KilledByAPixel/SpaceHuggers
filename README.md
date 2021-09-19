@@ -58,7 +58,7 @@ Good luck, have fun, and give space a hug for me.
 - Debug visualization system not in JS13K build. (press ~ to enter debug mode)
 
 # Enemy Types
-- New Recruit (Green) - A bit shorter, more hesitant, takes only 1 hit
+- Recruit (Green) - A bit shorter, more hesitant, takes only 1 hit
 - Soldier (Blue) - Average height and ability, takes 2 hits
 - Captain (Red) - Can climb walls and jumps more often, takes 3 hits
 - Specialist (White) - Jumps and rolls often, they are ninjas, takes 4 hits
