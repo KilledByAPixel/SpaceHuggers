@@ -48,10 +48,6 @@ class Character extends GameObject
             super.update();
             return; // ignore offscreen objects
         }
-
-        //const lowHealth = this.health < this.healthMax/2;
-        //if (lowHealth)
-        //    this.additiveColor = this.additiveColor.lerp(new Color(.5,0,0,0),Math.sin(time*PI*4)*.5+.5);
             
         let moveInput = this.moveInput.copy();
 
@@ -62,15 +58,11 @@ class Character extends GameObject
             const testPos = this.pos.add(vec2(0, y + .1*this.moveInput.y - this.size.y*.5));
             const collisionData = getTileCollisionData(testPos);
             touchingLadder |= collisionData == tileType_ladder;
-            //debugPoint(testPos, collisionData == tileType_ladder ? 'red' : 'white');
         }
         if (!touchingLadder)
             this.climbingLadder = 0;
         else if (this.moveInput.y)
             this.climbingLadder = 1;
-            
-        // update ladder
-        //    debugPoint(vec2((this.pos.x|0)+.5, this.pos.y));
 
         if (this.dodgeTimer.active())
         {
@@ -316,9 +308,6 @@ class Character extends GameObject
                     && getTileCollisionData(pos.add(vec2(1,0)))) // right
             )
                 return; // dont collide if something above it and nothing to left or right
-
-            //debugPoint(this.pos.add(vec2(0,-this.size.y*.5)), '#f00');
-            //debugPoint(pos.add(vec2(0,1)), '#0ff');
 
             // allow standing on top of ladders
             return !this.climbingLadder;
@@ -688,8 +677,6 @@ class Player extends Character
         this.burnTime = 2;
         
         this.eyeColor = (new Color).setHSLA(-playerIndex*.6,1,.5);
-        //this.color = this.color.mutate(.2);
-
         if (playerIndex)
         {
             this.color = (new Color).setHSLA(playerIndex*.3-.3,.5,.5);

@@ -270,7 +270,7 @@ function buildBase()
         previousFloorHeight = floorHeight;
     }
 
-    //checkpointPos = floorBottomCenterPos.copy(); // start player on base
+    //checkpointPos = floorBottomCenterPos.copy(); // start player on base for testing
 
     // spawn random enemies and props
     for(let i=20;levelEnemyCount>0&&i--;)
@@ -307,7 +307,6 @@ function generateLevel()
             return 1; // count not find pos
 
         // start on either side of level
-        //checkpointPos = vec2(randSeeded(levelSize.x-20,20), levelSize.y);
         checkpointPos = vec2(levelSize.x/2 + (levelSize.x/2-10-randSeeded(9))*(randSeeded()<.5?-1:1) | 0, levelSize.y);
         raycastHit = tileCollisionRaycast(checkpointPos, vec2(checkpointPos.x, 0));
     }

@@ -12,7 +12,7 @@ class GameObject extends EngineObject
     {
         super(pos, size, tileIndex, tileSize, angle);
         this.isGameObject = 1;
-        this.health = this.healthMax = this.canBurn = 0;
+        this.health = this.healthMax = 0;
         this.burnDelay = .1;
         this.burnTime = 3;
         this.damageTimer = new Timer;
@@ -460,13 +460,6 @@ class Weapon extends EngineObject
 
                 this.shellEmitter.localAngle = -.8*this.getMirrorSign();
                 this.shellEmitter.emitParticle();
-                if (this.parent)
-                {
-                    // knockback
-                    //if (!this.parent.groundObject || this.parent.velocity.lengthSquared()>.1)
-                    //this.parent.applyForce(direction.scale(-.02));
-                }
-
                 playSound(sound_shoot, this.pos);
 
                 // alert enemies
@@ -503,7 +496,7 @@ class Bullet extends EngineObject
         super.update();
 
         this.range -= this.velocity.length();
-        if (this.range < 0 )
+        if (this.range < 0)
         {
             const emitter = new ParticleEmitter(
                 this.pos, .2, .1, 100, PI, // pos, emitSize, emitTime, emitRate, emiteCone
@@ -576,7 +569,6 @@ class Bullet extends EngineObject
         emitter.angle = this.lastVelocity.angle() + PI;
         emitter.elasticity = .3;
 
-        //playSound(sound_bulletHit, this.pos);
         this.destroy();
     }
 
@@ -584,6 +576,5 @@ class Bullet extends EngineObject
     {
         drawRect(this.pos, vec2(.4,.5), new Color(1,1,1,.5), this.velocity.angle());
         drawRect(this.pos, vec2(.2,.5), this.color, this.velocity.angle());
-        //drawTile(this.pos, vec2(.2,.5), 0, undefined, this.color, this.velocity.angle());
     }
 }

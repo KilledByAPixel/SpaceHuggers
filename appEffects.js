@@ -227,13 +227,7 @@ function decorateBackgroundTile(pos)
 {
     const tileData = getTileBackgroundData(pos);
     if (tileData <= 0)
-    {
-        tileData || tileBackgroundLayer.setData(pos, new TileLayerData, 1); // force it to clear tile tile if it was empty
-        return;
-    }
-
-    //if (tileData != tileType_dirt && tileData != tileType_base)
-    //    return;
+        return; // no need to clear if background cant change
 
     // round corners
     for(let i=4;i--;)
@@ -378,11 +372,7 @@ function drawStars()
             if (size < 9)
                 mainContext.fillRect(screenPos.x, screenPos.y, size, size);
             else
-            {
-                mainContext.beginPath();
-                mainContext.arc(screenPos.x, screenPos.y, size, 0, 9);
-                mainContext.fill();
-            }
+                mainContext.beginPath(mainContext.fill(mainContext.arc(screenPos.x, screenPos.y, size, 0, 9)));
         }
         else
             drawTileScreenSpace(screenPos, vec2(size), 0, vec2(16), color);
@@ -434,7 +424,6 @@ function generateParallaxLayers()
         const gradient = tileParallaxLayer.context.fillStyle = tileParallaxLayer.context.createLinearGradient(0,0,0,tileParallaxLayer.canvas.height = parallaxSize.y);
         gradient.addColorStop(0,layerColor.rgba());
         gradient.addColorStop(1,layerColor.subtract(new Color(1,1,1,0)).mutate(.1).clamp().rgba());
-        //tileParallaxLayer.context.fillStyle = layerColor.rgba();
 
         for(let x=parallaxSize.x;x--;)
         {
