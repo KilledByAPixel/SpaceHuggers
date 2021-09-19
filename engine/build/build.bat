@@ -50,28 +50,22 @@ rem minify code with closure
 call google-closure-compiler --js build\index.js --js_output_file build\index.js --compilation_level ADVANCED --language_out ECMASCRIPT_2019 --warning_level VERBOSE --jscomp_off * --assume_function_wrapper
 if %ERRORLEVEL% NEQ 0 (
     pause
-    exit /b %errorlevel%
+    exit /b %ERRORLEVEL%
 )
-
-rem get rid of strict mode by adding a 0 at the top
-rem copy build\index.js build\indexStrict.js
-rem del build\index.js
-rem echo 0 > build\index.js
-rem type build\indexStrict.js >> build\index.js
 
 rem more minification with uglify or terser (they both are about the same)
 call uglifyjs -o build\index.js --compress --mangle -- build\index.js
 rem call terser -o build\index.js --compress --mangle -- build\index.js
 if %ERRORLEVEL% NEQ 0 (
     pause
-    exit /b %errorlevel%
+    exit /b %ERRORLEVEL%
 )
 
 rem roadroaller compresses the code better then zip
 call roadroller build\index.js -o build\index.js
 if %ERRORLEVEL% NEQ 0 (
     pause
-    exit /b %errorlevel%
+    exit /b %ERRORLEVEL%
 )
 
 rem build the html
@@ -84,16 +78,16 @@ rem minify the png
 call imagemin tiles.png > build\tiles.png
 if %ERRORLEVEL% NEQ 0 (
     pause
-    exit /b %errorlevel%
+    exit /b %ERRORLEVEL%
 )
 
 rem zip the result
 cd build
-call advzip -a -4 -i 99 ..\%name%.zip index.html
-rem call ..\ect -9 -strip -zip ..\%name%.zip index.html
+rem call advzip -a -4 -i 99 ..\%name%.zip index.html
+call ..\ect -9 -strip -zip ..\%name%.zip index.html
 if %ERRORLEVEL% NEQ 0 (
     pause
-    exit /b %errorlevel%
+    exit /b %ERRORLEVEL%
 )
 
 rem remove build folder
