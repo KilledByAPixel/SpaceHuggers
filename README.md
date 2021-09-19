@@ -1,5 +1,4 @@
-# S P A C E H U G G E R S
-A JS13k Game by Frank Force
+![Space Huggers - A JS13k Game by Frank Force](/screenshot.png)
 
 The empire is spreading like a plague across the galaxy and building outposts on remote planets.
 You are an elite rebel soldier tasked with wiping out those bases.
@@ -8,8 +7,6 @@ You have only 10 clones left, 3 more will be replenished after each mission.
 Good luck, have fun, and give space a hug for me.
 
 # [PLAY SPACE HUGGERS!](https://killedbyapixel.github.io/SpaceHuggers/)
-
-![Screenshot](/screenshot.png)
 
 # How To Play
 - Use WASD or D-Pad - Move, jump, and climb
