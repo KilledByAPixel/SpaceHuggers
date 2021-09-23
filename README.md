@@ -7,6 +7,7 @@ You have only 10 clones left, 3 more will be replenished after each mission.
 Good luck, have fun, and give space a hug for me.
 
 # [PLAY SPACE HUGGERS!](https://killedbyapixel.github.io/SpaceHuggers/)
+# [VIDEO DEMO](https://www.youtube.com/watch?v=6VXrnk18Z4s)
 
 # How To Play
 - Use WASD or D-Pad - Move, jump, and climb
