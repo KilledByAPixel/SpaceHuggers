@@ -6,7 +6,7 @@ Explore strange planets using your tools of destruction and eliminate the invade
 You have only 10 clones left, 3 more will be replenished after each mission.
 Good luck, have fun, and give space a hug for me.
 
-# [PLAY SPACE HUGGERS!](https://killedbyapixel.github.io/SpaceHuggers/)
+# [PLAY SPACE HUGGERS!](https://www.newgrounds.com/portal/view/819609)
 # [OFFICIAL JS13K BUILD](https://js13kgames.com/entries/space-huggers)
 # [VIDEO DEMO](https://www.youtube.com/watch?v=6VXrnk18Z4s)
 
