@@ -6,7 +6,7 @@ Explore strange planets using your tools of destruction and eliminate the invade
 You have only 10 clones left, 3 more will be replenished after each mission.
 Good luck, have fun, and give space a hug for me.
 
-## This game is only for learning purposes and not intended to be redistributed!
+## Copyright 2021 Frank Force, released under the [GNU GPL v3.0](LICENSE)
 
 # [PLAY SPACE HUGGERS!](https://www.newgrounds.com/portal/view/819609)
 # [OFFICIAL JS13K BUILD](https://js13kgames.com/entries/space-huggers)
